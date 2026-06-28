@@ -1,0 +1,972 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		241A6D472FF13F8C00CBA2EC /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 241A6D462FF13F8C00CBA2EC /* ReplayKit.framework */; };
+		241A6D4E2FF13F8C00CBA2EC /* BroadcastExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 241A6D442FF13F8C00CBA2EC /* BroadcastExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		241A6D5A2FF13FAF00CBA2EC /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 241A6D592FF13FAF00CBA2EC /* WidgetKit.framework */; };
+		241A6D5C2FF13FAF00CBA2EC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 241A6D5B2FF13FAF00CBA2EC /* SwiftUI.framework */; };
+		241A6D6D2FF13FB100CBA2EC /* FactShieldWidgetsExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 241A6D582FF13FAF00CBA2EC /* FactShieldWidgetsExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		241A6CC72FF13C9E00CBA2EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 241A6CB02FF13C9C00CBA2EC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 241A6CB72FF13C9C00CBA2EC;
+			remoteInfo = FactShield;
+		};
+		241A6CD12FF13C9E00CBA2EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 241A6CB02FF13C9C00CBA2EC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 241A6CB72FF13C9C00CBA2EC;
+			remoteInfo = FactShield;
+		};
+		241A6D4C2FF13F8C00CBA2EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 241A6CB02FF13C9C00CBA2EC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 241A6D432FF13F8C00CBA2EC;
+			remoteInfo = BroadcastExtension;
+		};
+		241A6D6B2FF13FB100CBA2EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 241A6CB02FF13C9C00CBA2EC /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 241A6D572FF13FAF00CBA2EC;
+			remoteInfo = FactShieldWidgetsExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		241A6D532FF13F8C00CBA2EC /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				241A6D6D2FF13FB100CBA2EC /* FactShieldWidgetsExtension.appex in Embed Foundation Extensions */,
+				241A6D4E2FF13F8C00CBA2EC /* BroadcastExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		241A6CB82FF13C9C00CBA2EC /* FactShield.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FactShield.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		241A6CC62FF13C9E00CBA2EC /* FactShieldTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FactShieldTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		241A6CD02FF13C9E00CBA2EC /* FactShieldUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FactShieldUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		241A6D442FF13F8C00CBA2EC /* BroadcastExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BroadcastExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		241A6D462FF13F8C00CBA2EC /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
+		241A6D582FF13FAF00CBA2EC /* FactShieldWidgetsExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = FactShieldWidgetsExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		241A6D592FF13FAF00CBA2EC /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		241A6D5B2FF13FAF00CBA2EC /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		241A6D732FF1406500CBA2EC /* FactShieldWidgetsExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = FactShieldWidgetsExtension.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		2406C00D2FF146ED00FF8455 /* Exceptions for "FactShield" folder in "FactShield" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				BroadcastExtension/Info.plist,
+				Info.plist,
+				Resources/Info.plist,
+				Widgets/FactShieldWidget.swift,
+				Widgets/WidgetBundle.swift,
+			);
+			target = 241A6CB72FF13C9C00CBA2EC /* FactShield */;
+		};
+		2406C00F2FF1479600FF8455 /* Exceptions for "FactShield" folder in "FactShieldWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Widgets/ActivityManager.swift,
+				Widgets/FactShieldLiveActivity.swift,
+				Widgets/FactShieldWidget.swift,
+				Widgets/WidgetBundle.swift,
+			);
+			target = 241A6D572FF13FAF00CBA2EC /* FactShieldWidgetsExtension */;
+		};
+
+		241A6D4F2FF13F8C00CBA2EC /* Exceptions for "BroadcastExtension" folder in "BroadcastExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 241A6D432FF13F8C00CBA2EC /* BroadcastExtension */;
+		};
+		241A6D6E2FF13FB100CBA2EC /* Exceptions for "FactShieldWidgets" folder in "FactShieldWidgetsExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 241A6D572FF13FAF00CBA2EC /* FactShieldWidgetsExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		241A6CBA2FF13C9C00CBA2EC /* FactShield */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				2406C00D2FF146ED00FF8455 /* Exceptions for "FactShield" folder in "FactShield" target */,
+				2406C00F2FF1479600FF8455 /* Exceptions for "FactShield" folder in "FactShieldWidgetsExtension" target */,
+			);
+			path = FactShield;
+			sourceTree = "<group>";
+		};
+		241A6CC92FF13C9E00CBA2EC /* FactShieldTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FactShieldTests;
+			sourceTree = "<group>";
+		};
+		241A6CD32FF13C9E00CBA2EC /* FactShieldUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = FactShieldUITests;
+			sourceTree = "<group>";
+		};
+		241A6D482FF13F8C00CBA2EC /* BroadcastExtension */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				241A6D4F2FF13F8C00CBA2EC /* Exceptions for "BroadcastExtension" folder in "BroadcastExtension" target */,
+			);
+			path = BroadcastExtension;
+			sourceTree = "<group>";
+		};
+		241A6D5D2FF13FAF00CBA2EC /* FactShieldWidgets */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				241A6D6E2FF13FB100CBA2EC /* Exceptions for "FactShieldWidgets" folder in "FactShieldWidgetsExtension" target */,
+			);
+			path = FactShieldWidgets;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		241A6CB52FF13C9C00CBA2EC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6CC32FF13C9E00CBA2EC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6CCD2FF13C9E00CBA2EC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6D412FF13F8C00CBA2EC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				241A6D472FF13F8C00CBA2EC /* ReplayKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6D552FF13FAF00CBA2EC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				241A6D5C2FF13FAF00CBA2EC /* SwiftUI.framework in Frameworks */,
+				241A6D5A2FF13FAF00CBA2EC /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		241A6CAF2FF13C9C00CBA2EC = {
+			isa = PBXGroup;
+			children = (
+				241A6D732FF1406500CBA2EC /* FactShieldWidgetsExtension.entitlements */,
+				241A6CBA2FF13C9C00CBA2EC /* FactShield */,
+				241A6CC92FF13C9E00CBA2EC /* FactShieldTests */,
+				241A6CD32FF13C9E00CBA2EC /* FactShieldUITests */,
+				241A6D482FF13F8C00CBA2EC /* BroadcastExtension */,
+				241A6D5D2FF13FAF00CBA2EC /* FactShieldWidgets */,
+				241A6D452FF13F8C00CBA2EC /* Frameworks */,
+				241A6CB92FF13C9C00CBA2EC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		241A6CB92FF13C9C00CBA2EC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				241A6CB82FF13C9C00CBA2EC /* FactShield.app */,
+				241A6CC62FF13C9E00CBA2EC /* FactShieldTests.xctest */,
+				241A6CD02FF13C9E00CBA2EC /* FactShieldUITests.xctest */,
+				241A6D442FF13F8C00CBA2EC /* BroadcastExtension.appex */,
+				241A6D582FF13FAF00CBA2EC /* FactShieldWidgetsExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		241A6D452FF13F8C00CBA2EC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				241A6D462FF13F8C00CBA2EC /* ReplayKit.framework */,
+				241A6D592FF13FAF00CBA2EC /* WidgetKit.framework */,
+				241A6D5B2FF13FAF00CBA2EC /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		241A6CB72FF13C9C00CBA2EC /* FactShield */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 241A6CDA2FF13C9E00CBA2EC /* Build configuration list for PBXNativeTarget "FactShield" */;
+			buildPhases = (
+				241A6CB42FF13C9C00CBA2EC /* Sources */,
+				241A6CB52FF13C9C00CBA2EC /* Frameworks */,
+				241A6CB62FF13C9C00CBA2EC /* Resources */,
+				241A6D532FF13F8C00CBA2EC /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				241A6D4D2FF13F8C00CBA2EC /* PBXTargetDependency */,
+				241A6D6C2FF13FB100CBA2EC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				241A6CBA2FF13C9C00CBA2EC /* FactShield */,
+			);
+			name = FactShield;
+			packageProductDependencies = (
+			);
+			productName = FactShield;
+			productReference = 241A6CB82FF13C9C00CBA2EC /* FactShield.app */;
+			productType = "com.apple.product-type.application";
+		};
+		241A6CC52FF13C9E00CBA2EC /* FactShieldTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 241A6CDD2FF13C9E00CBA2EC /* Build configuration list for PBXNativeTarget "FactShieldTests" */;
+			buildPhases = (
+				241A6CC22FF13C9E00CBA2EC /* Sources */,
+				241A6CC32FF13C9E00CBA2EC /* Frameworks */,
+				241A6CC42FF13C9E00CBA2EC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				241A6CC82FF13C9E00CBA2EC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				241A6CC92FF13C9E00CBA2EC /* FactShieldTests */,
+			);
+			name = FactShieldTests;
+			packageProductDependencies = (
+			);
+			productName = FactShieldTests;
+			productReference = 241A6CC62FF13C9E00CBA2EC /* FactShieldTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		241A6CCF2FF13C9E00CBA2EC /* FactShieldUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 241A6CE02FF13C9E00CBA2EC /* Build configuration list for PBXNativeTarget "FactShieldUITests" */;
+			buildPhases = (
+				241A6CCC2FF13C9E00CBA2EC /* Sources */,
+				241A6CCD2FF13C9E00CBA2EC /* Frameworks */,
+				241A6CCE2FF13C9E00CBA2EC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				241A6CD22FF13C9E00CBA2EC /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				241A6CD32FF13C9E00CBA2EC /* FactShieldUITests */,
+			);
+			name = FactShieldUITests;
+			packageProductDependencies = (
+			);
+			productName = FactShieldUITests;
+			productReference = 241A6CD02FF13C9E00CBA2EC /* FactShieldUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		241A6D432FF13F8C00CBA2EC /* BroadcastExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 241A6D502FF13F8C00CBA2EC /* Build configuration list for PBXNativeTarget "BroadcastExtension" */;
+			buildPhases = (
+				241A6D402FF13F8C00CBA2EC /* Sources */,
+				241A6D412FF13F8C00CBA2EC /* Frameworks */,
+				241A6D422FF13F8C00CBA2EC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				241A6D482FF13F8C00CBA2EC /* BroadcastExtension */,
+			);
+			name = BroadcastExtension;
+			packageProductDependencies = (
+			);
+			productName = BroadcastExtension;
+			productReference = 241A6D442FF13F8C00CBA2EC /* BroadcastExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		241A6D572FF13FAF00CBA2EC /* FactShieldWidgetsExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 241A6D6F2FF13FB100CBA2EC /* Build configuration list for PBXNativeTarget "FactShieldWidgetsExtension" */;
+			buildPhases = (
+				241A6D542FF13FAF00CBA2EC /* Sources */,
+				241A6D552FF13FAF00CBA2EC /* Frameworks */,
+				241A6D562FF13FAF00CBA2EC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				241A6D5D2FF13FAF00CBA2EC /* FactShieldWidgets */,
+			);
+			name = FactShieldWidgetsExtension;
+			packageProductDependencies = (
+			);
+			productName = FactShieldWidgetsExtension;
+			productReference = 241A6D582FF13FAF00CBA2EC /* FactShieldWidgetsExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		241A6CB02FF13C9C00CBA2EC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					241A6CB72FF13C9C00CBA2EC = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					241A6CC52FF13C9E00CBA2EC = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 241A6CB72FF13C9C00CBA2EC;
+					};
+					241A6CCF2FF13C9E00CBA2EC = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = 241A6CB72FF13C9C00CBA2EC;
+					};
+					241A6D432FF13F8C00CBA2EC = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					241A6D572FF13FAF00CBA2EC = {
+						CreatedOnToolsVersion = 16.4;
+					};
+				};
+			};
+			buildConfigurationList = 241A6CB32FF13C9C00CBA2EC /* Build configuration list for PBXProject "FactShield" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 241A6CAF2FF13C9C00CBA2EC;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 241A6CB92FF13C9C00CBA2EC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				241A6CB72FF13C9C00CBA2EC /* FactShield */,
+				241A6CC52FF13C9E00CBA2EC /* FactShieldTests */,
+				241A6CCF2FF13C9E00CBA2EC /* FactShieldUITests */,
+				241A6D432FF13F8C00CBA2EC /* BroadcastExtension */,
+				241A6D572FF13FAF00CBA2EC /* FactShieldWidgetsExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		241A6CB62FF13C9C00CBA2EC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6CC42FF13C9E00CBA2EC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6CCE2FF13C9E00CBA2EC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6D422FF13F8C00CBA2EC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6D562FF13FAF00CBA2EC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		241A6CB42FF13C9C00CBA2EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6CC22FF13C9E00CBA2EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6CCC2FF13C9E00CBA2EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6D402FF13F8C00CBA2EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		241A6D542FF13FAF00CBA2EC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		241A6CC82FF13C9E00CBA2EC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 241A6CB72FF13C9C00CBA2EC /* FactShield */;
+			targetProxy = 241A6CC72FF13C9E00CBA2EC /* PBXContainerItemProxy */;
+		};
+		241A6CD22FF13C9E00CBA2EC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 241A6CB72FF13C9C00CBA2EC /* FactShield */;
+			targetProxy = 241A6CD12FF13C9E00CBA2EC /* PBXContainerItemProxy */;
+		};
+		241A6D4D2FF13F8C00CBA2EC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 241A6D432FF13F8C00CBA2EC /* BroadcastExtension */;
+			targetProxy = 241A6D4C2FF13F8C00CBA2EC /* PBXContainerItemProxy */;
+		};
+		241A6D6C2FF13FB100CBA2EC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 241A6D572FF13FAF00CBA2EC /* FactShieldWidgetsExtension */;
+			targetProxy = 241A6D6B2FF13FB100CBA2EC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		241A6CD82FF13C9E00CBA2EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		241A6CD92FF13C9E00CBA2EC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		241A6CDB2FF13C9E00CBA2EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FactShield/FactShield.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FactShield/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "FactShield needs microphone access to listen to audio for real-time fact-checking";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "FactShield uses speech recognition to transcribe audio for fact-checking";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		241A6CDC2FF13C9E00CBA2EC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = FactShield/FactShield.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FactShield/Info.plist;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "FactShield needs microphone access to listen to audio for real-time fact-checking";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "FactShield uses speech recognition to transcribe audio for fact-checking";
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
+				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
+				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShield;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
+		241A6CDE2FF13C9E00CBA2EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShieldTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FactShield.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FactShield";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		241A6CDF2FF13C9E00CBA2EC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShieldTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FactShield.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FactShield";
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
+		241A6CE12FF13C9E00CBA2EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShieldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = FactShield;
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		241A6CE22FF13C9E00CBA2EC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MACOSX_DEPLOYMENT_TARGET = 15.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShieldUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = auto;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx xros xrsimulator";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2,7";
+				TEST_TARGET_NAME = FactShield;
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
+		241A6D512FF13F8C00CBA2EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BroadcastExtension/BroadcastExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BroadcastExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BroadcastExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShield.BroadcastExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Debug;
+		};
+		241A6D522FF13F8C00CBA2EC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = BroadcastExtension/BroadcastExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = BroadcastExtension/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = BroadcastExtension;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShield.BroadcastExtension;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				VALIDATE_PRODUCT = YES;
+				XROS_DEPLOYMENT_TARGET = 2.5;
+			};
+			name = Release;
+		};
+		241A6D702FF13FB100CBA2EC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = FactShieldWidgetsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FactShieldWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FactShieldWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShield.FactShieldWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		241A6D712FF13FB100CBA2EC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = FactShieldWidgetsExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = T3KX3F4LGB;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = FactShieldWidgets/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = FactShieldWidgets;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.factshield.FactShield.FactShieldWidgets;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		241A6CB32FF13C9C00CBA2EC /* Build configuration list for PBXProject "FactShield" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				241A6CD82FF13C9E00CBA2EC /* Debug */,
+				241A6CD92FF13C9E00CBA2EC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		241A6CDA2FF13C9E00CBA2EC /* Build configuration list for PBXNativeTarget "FactShield" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				241A6CDB2FF13C9E00CBA2EC /* Debug */,
+				241A6CDC2FF13C9E00CBA2EC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		241A6CDD2FF13C9E00CBA2EC /* Build configuration list for PBXNativeTarget "FactShieldTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				241A6CDE2FF13C9E00CBA2EC /* Debug */,
+				241A6CDF2FF13C9E00CBA2EC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		241A6CE02FF13C9E00CBA2EC /* Build configuration list for PBXNativeTarget "FactShieldUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				241A6CE12FF13C9E00CBA2EC /* Debug */,
+				241A6CE22FF13C9E00CBA2EC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		241A6D502FF13F8C00CBA2EC /* Build configuration list for PBXNativeTarget "BroadcastExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				241A6D512FF13F8C00CBA2EC /* Debug */,
+				241A6D522FF13F8C00CBA2EC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		241A6D6F2FF13FB100CBA2EC /* Build configuration list for PBXNativeTarget "FactShieldWidgetsExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				241A6D702FF13FB100CBA2EC /* Debug */,
+				241A6D712FF13FB100CBA2EC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 241A6CB02FF13C9C00CBA2EC /* Project object */;
+}

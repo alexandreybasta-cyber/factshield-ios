@@ -1,0 +1,3 @@
+- The background service worker (`src/background/service-worker.js`) acts as the central event hub, mediating all cross-context communication.
+- A shared message contract (`src/shared/messages.js`) defines strict payload structures for interactions between the content script (extraction), API pipeline (processing), and side panel (presentation).
+- Manifest V3 permissions and host allowlists enforce security boundaries, while the service worker manages the lifecycle of the `FactCheckPipeline` instance to coordinate asynchronous AI responses with UI state updates.

@@ -2,6 +2,8 @@ import ActivityKit
 import WidgetKit
 import SwiftUI
 
+// MARK: - FactCheckAttributes (Live Activity data model)
+
 struct FactCheckAttributes: ActivityAttributes {
     var captureMode: CaptureMode
     var sourceApp: String?

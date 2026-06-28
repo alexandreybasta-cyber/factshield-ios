@@ -1,0 +1,1 @@
+Renders the Chrome extension side panel for real-time and manual fact-checking, displaying verdicts, confidence meters, and source credibility.

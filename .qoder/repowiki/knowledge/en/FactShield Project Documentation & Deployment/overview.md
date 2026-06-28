@@ -1,0 +1,1 @@
+Provides comprehensive architectural specifications, iOS build instructions, and API-based deployment automation for the FactShield live fact-checking system.

@@ -1,0 +1,2 @@
+- Uses `push-via-api.sh` to push project files directly to GitHub via REST API calls (creating blobs, trees, and commits manually) instead of standard `git push`.
+- Development workflow is driven by LLM prompts defined in `PROMPT-FOR-QODER.md`, instructing agents to follow step-by-step build instructions in the Markdown files.

@@ -1,9 +1,5 @@
 import WidgetKit
 import SwiftUI
 
-@main
-struct FactShieldWidgetBundle: WidgetBundle {
-    var body: some Widget {
-        FactShieldLiveActivityWidget()
-    }
-}
+// Note: The @main entry point is in the FactShieldWidgets extension target.
+// This file is kept for reference but the actual bundle is defined in FactShieldWidgetsBundle.swift.

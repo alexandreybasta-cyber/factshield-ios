@@ -1,0 +1,1 @@
+Orchestrates real-time fact-checking by routing DOM-extracted claims through an AI pipeline and broadcasting verdicts to the side panel UI.

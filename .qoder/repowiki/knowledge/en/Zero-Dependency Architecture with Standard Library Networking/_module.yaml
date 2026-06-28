@@ -1,0 +1,12 @@
+schema_version: 1
+module_path: dependency_management
+title: Zero-Dependency Architecture with Standard Library Networking
+scope: []
+source_files:
+    - FactShield/Package.swift
+    - FactShield/FactShield/Core/Network/APIClient.swift
+    - FactShield/FactShield/Core/Network/QwenAPI.swift
+    - FactShield/FactShield/Core/Network/SearchAPI.swift
+    - FactShield/FactShield/Utilities/Constants.swift
+depends_on: []
+related_to: []

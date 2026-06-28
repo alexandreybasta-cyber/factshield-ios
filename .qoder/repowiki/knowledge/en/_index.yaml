@@ -1,0 +1,121 @@
+# 知识卡导出索引文件
+schema_version: 1
+locale: en-US
+branch: main
+nodes_managed: true
+exported_at: "2026-06-28T10:49:37Z"
+modules:
+    "":
+        dir_name: FactShield Cross-Platform Fact-Checking Orchestrator
+        title: FactShield Cross-Platform Fact-Checking Orchestrator
+        scope:
+            - '**'
+        source_files:
+            - FactShield/FactShield/Features/Home/HomeView.swift
+            - FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift
+            - FactShield/FactShield/Features/Settings/SettingsView.swift
+            - FactShield/FactShield/App/FactShieldApp.swift
+            - FactShield/FactShield/Widgets/FactShieldWidget.swift
+        children:
+            - factshield_chromeextension
+        depends_on: []
+        related_to: []
+    build_system:
+        dir_name: iOS Build & Deployment Workflow
+        title: iOS Build & Deployment Workflow
+        scope: []
+        source_files:
+            - FactShield-iOS-BuildInstructions.md
+            - FactShield/Package.swift
+            - push-via-api.sh
+            - FactShield/FactShield/Resources/Info.plist
+            - FactShield/FactShield/BroadcastExtension/Info.plist
+            - PROMPT-FOR-QODER.md
+        children: []
+        depends_on: []
+        related_to: []
+    configuration_system:
+        dir_name: Configuration System — UserDefaults + Environment Variable Layering_2
+        title: Configuration System — UserDefaults + Environment Variable Layering
+        scope: []
+        source_files:
+            - FactShield/FactShield/Utilities/Constants.swift
+            - FactShield/FactShield/Features/Settings/SettingsView.swift
+            - FactShield/FactShield/Core/Network/QwenAPI.swift
+            - FactShield/FactShield/Core/Network/SearchAPI.swift
+            - FactShield/FactShield/Resources/Info.plist
+            - FactShield/FactShield/App/AppState.swift
+        children: []
+        depends_on: []
+        related_to: []
+    dependency_management:
+        dir_name: Zero-Dependency Architecture with Standard Library Networking_2
+        title: Zero-Dependency Architecture with Standard Library Networking
+        scope: []
+        source_files:
+            - FactShield/Package.swift
+            - FactShield/FactShield/Core/Network/APIClient.swift
+            - FactShield/FactShield/Core/Network/QwenAPI.swift
+            - FactShield-ChromeExtension/manifest.json
+            - FactShield-ChromeExtension/src/api/pipeline.js
+        children: []
+        depends_on: []
+        related_to: []
+    error_handling:
+        dir_name: Swift Error Handling with Typed Enums and Retry Logic
+        title: Swift Error Handling with Typed Enums and Retry Logic
+        scope: []
+        source_files:
+            - FactShield/FactShield/Core/Network/APIClient.swift
+            - FactShield/FactShield/Models/Enums.swift
+            - FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift
+            - FactShield/FactShield/Core/Claims/ClaimExtractionService.swift
+            - FactShield/FactShield/App/AppState.swift
+            - FactShield/FactShield/Utilities/Logger.swift
+            - FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift
+        children: []
+        depends_on: []
+        related_to: []
+    factshield_chromeextension:
+        dir_name: FactShield Chrome Extension Orchestrator
+        title: FactShield Chrome Extension Orchestrator
+        scope:
+            - FactShield-ChromeExtension/
+        source_files: []
+        children:
+            - factshield_chromeextension/api_integrations
+            - factshield_chromeextension/sidepanel_ui
+        depends_on: []
+        related_to: []
+    factshield_chromeextension/api_integrations:
+        dir_name: Fact-Checking API Integrations & Pipeline Orchestration
+        title: Fact-Checking API Integrations & Pipeline Orchestration
+        scope:
+            - FactShield-ChromeExtension/src/api/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    factshield_chromeextension/sidepanel_ui:
+        dir_name: FactShield Side Panel UI
+        title: FactShield Side Panel UI
+        scope:
+            - FactShield-ChromeExtension/src/sidepanel/
+        source_files: []
+        children: []
+        depends_on: []
+        related_to: []
+    logging_system:
+        dir_name: OSLog-Based Structured Logging System_2
+        title: OSLog-Based Structured Logging System
+        scope: []
+        source_files:
+            - FactShield/FactShield/Utilities/Logger.swift
+            - FactShield/FactShield/Core/Audio/AudioCaptureService.swift
+            - FactShield/FactShield/Core/Network/APIClient.swift
+            - FactShield/FactShield/Core/Claims/ClaimExtractionService.swift
+            - FactShield/FactShield/Core/Network/QwenAPI.swift
+            - FactShield/FactShield/BroadcastExtension/SampleHandler.swift
+        children: []
+        depends_on: []
+        related_to: []

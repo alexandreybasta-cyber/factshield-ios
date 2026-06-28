@@ -1,0 +1,4 @@
+- Entry point: index.html loads Tailwind CSS via CDN with a custom dark-mode theme configuration and mounts the app container.
+- Core logic: app.js implements a centralized state object, a render loop that regenerates the DOM from template literals, and chrome.runtime messaging to coordinate with the background pipeline.
+- Styling: styles.css provides custom animations, scrollbar overrides, and interactive transitions that complement the Tailwind utility classes.
+- Dependency direction: UI depends on Chrome extension APIs (chrome.runtime, chrome.storage) and the Tailwind CDN; no internal module imports or build tooling are present.

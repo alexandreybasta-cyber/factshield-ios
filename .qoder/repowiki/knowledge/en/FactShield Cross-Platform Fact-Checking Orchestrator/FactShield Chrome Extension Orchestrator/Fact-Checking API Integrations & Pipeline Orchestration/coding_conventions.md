@@ -1,0 +1,4 @@
+- All API integration modules use a consistent `LOG_PREFIX` ('[FactShield]') for structured console logging and error tracking.
+- External API calls in service modules include defensive checks for missing API keys, returning empty arrays or null instead of throwing unhandled exceptions.
+- LLM interactions in `qwen.js` enforce JSON output via `response_format: { type: 'json_object' }` and include robust parsing logic to handle varied response structures.
+- Network requests in `qwen.js` implement exponential backoff retry logic specifically for HTTP 429 (Rate Limit) errors.

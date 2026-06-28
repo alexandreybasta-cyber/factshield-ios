@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: build_system
+title: iOS Build & Deployment Workflow
+scope: []
+source_files:
+    - FactShield-iOS-BuildInstructions.md
+    - FactShield/Package.swift
+    - push-via-api.sh
+    - FactShield/FactShield/Resources/Info.plist
+    - FactShield/FactShield/BroadcastExtension/Info.plist
+    - PROMPT-FOR-QODER.md
+depends_on: []
+related_to: []

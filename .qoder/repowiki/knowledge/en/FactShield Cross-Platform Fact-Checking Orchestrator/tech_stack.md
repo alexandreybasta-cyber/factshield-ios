@@ -1,0 +1,1 @@
+Swift (iOS), JavaScript (Chrome Extension), Qwen API (LLM), Tavily/Google Fact Check APIs (Evidence)

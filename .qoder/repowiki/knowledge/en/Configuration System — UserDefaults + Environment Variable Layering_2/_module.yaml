@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: configuration_system
+title: Configuration System — UserDefaults + Environment Variable Layering
+scope: []
+source_files:
+    - FactShield/FactShield/Utilities/Constants.swift
+    - FactShield/FactShield/Features/Settings/SettingsView.swift
+    - FactShield/FactShield/Core/Network/QwenAPI.swift
+    - FactShield/FactShield/Core/Network/SearchAPI.swift
+    - FactShield/FactShield/Resources/Info.plist
+    - FactShield/FactShield/App/AppState.swift
+depends_on: []
+related_to: []

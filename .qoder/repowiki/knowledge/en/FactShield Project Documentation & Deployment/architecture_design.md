@@ -1,0 +1,3 @@
+- Serves as the documentation and operational root for a multi-platform project (iOS, Browser Extension, Backend) defined in Markdown specifications.
+- Separates concerns into high-level architecture (`FactShield-Architecture.md`), platform-specific implementation guides (`FactShield-iOS-BuildInstructions.md`), and developer prompts (`PROMPT-FOR-QODER.md`).
+- Includes a standalone Bash automation script (`push-via-api.sh`) for direct GitHub API interaction, bypassing standard Git CLI workflows for repository initialization and bulk uploads.

@@ -1,0 +1,8 @@
+schema_version: 1
+module_path: factshield_chromeextension
+title: FactShield Chrome Extension Orchestrator
+scope:
+    - FactShield-ChromeExtension/
+source_files: []
+depends_on: []
+related_to: []

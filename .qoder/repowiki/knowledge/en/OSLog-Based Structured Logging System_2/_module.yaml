@@ -1,0 +1,13 @@
+schema_version: 1
+module_path: logging_system
+title: OSLog-Based Structured Logging System
+scope: []
+source_files:
+    - FactShield/FactShield/Utilities/Logger.swift
+    - FactShield/FactShield/Core/Audio/AudioCaptureService.swift
+    - FactShield/FactShield/Core/Network/APIClient.swift
+    - FactShield/FactShield/Core/Claims/ClaimExtractionService.swift
+    - FactShield/FactShield/Core/Network/QwenAPI.swift
+    - FactShield/FactShield/BroadcastExtension/SampleHandler.swift
+depends_on: []
+related_to: []

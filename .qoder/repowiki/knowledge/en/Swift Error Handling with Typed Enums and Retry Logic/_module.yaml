@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: error_handling
+title: Swift Error Handling with Typed Enums and Retry Logic
+scope: []
+source_files:
+    - FactShield/FactShield/Core/Network/APIClient.swift
+    - FactShield/FactShield/Models/Enums.swift
+    - FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift
+    - FactShield/FactShield/Core/Claims/ClaimExtractionService.swift
+    - FactShield/FactShield/App/AppState.swift
+    - FactShield/FactShield/Utilities/Logger.swift
+    - FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift
+depends_on: []
+related_to: []

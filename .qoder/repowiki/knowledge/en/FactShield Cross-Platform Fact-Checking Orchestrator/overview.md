@@ -1,0 +1,1 @@
+Orchestrates a unified, zero-dependency fact-checking pipeline across iOS and Chrome platforms, enforcing consistent verdict logic and native system integration.
