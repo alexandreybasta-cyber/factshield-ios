@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FactShield Icon Generator</title>
+  <style>
+    body { font-family: system-ui, sans-serif; padding: 2rem; background: #1a1a2e; color: #eee; }
+    .icon-grid { display: flex; gap: 2rem; align-items: end; margin: 2rem 0; }
+    .icon-item { text-align: center; }
+    canvas { border: 1px solid #333; border-radius: 8px; }
+    a { display: inline-block; margin-top: 0.5rem; padding: 0.5rem 1rem; background: #4f46e5; color: white; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+    a:hover { background: #4338ca; }
+    h1 { color: #a5b4fc; }
+    p { color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <h1>FactShield Icon Generator</h1>
+  <p>Right-click each icon and "Save Image As..." or use the download links below.</p>
+  
+  <div class="icon-grid">
+    <div class="icon-item">
+      <canvas id="icon16" width="16" height="16"></canvas>
+      <br><a id="dl16" download="icon16.png">Download 16x16</a>
+    </div>
+    <div class="icon-item">
+      <canvas id="icon48" width="48" height="48"></canvas>
+      <br><a id="dl48" download="icon48.png">Download 48x48</a>
+    </div>
+    <div class="icon-item">
+      <canvas id="icon128" width="128" height="128"></canvas>
+      <br><a id="dl128" download="icon128.png">Download 128x128</a>
+    </div>
+  </div>
+
+  <script>
+    function drawShieldIcon(canvas) {
+      const ctx = canvas.getContext('2d');
+      const s = canvas.width;
+      const p = s * 0.1; // padding
+
+      // Clear
+      ctx.clearRect(0, 0, s, s);
+
+      // Shield shape
+      ctx.beginPath();
+      const cx = s / 2;
+      const top = p;
+      const bottom = s - p;
+      const left = p;
+      const right = s - p;
+      const midY = s * 0.6;
+
+      ctx.moveTo(cx, top);
+      ctx.lineTo(right, top + (s * 0.12));
+      ctx.lineTo(right, midY);
+      ctx.quadraticCurveTo(right, bottom * 0.85, cx, bottom);
+      ctx.quadraticCurveTo(left, bottom * 0.85, left, midY);
+      ctx.lineTo(left, top + (s * 0.12));
+      ctx.closePath();
+
+      // Gradient fill
+      const grad = ctx.createLinearGradient(0, 0, s, s);
+      grad.addColorStop(0, '#6366f1');
+      grad.addColorStop(1, '#4f46e5');
+      ctx.fillStyle = grad;
+      ctx.fill();
+
+      // Border
+      ctx.strokeStyle = '#818cf8';
+      ctx.lineWidth = Math.max(1, s * 0.03);
+      ctx.stroke();
+
+      // Checkmark
+      ctx.beginPath();
+      const checkScale = s * 0.18;
+      const checkX = cx - checkScale * 0.8;
+      const checkY = s * 0.48;
+
+      ctx.moveTo(checkX, checkY);
+      ctx.lineTo(checkX + checkScale * 0.7, checkY + checkScale * 0.7);
+      ctx.lineTo(checkX + checkScale * 2, checkY - checkScale * 0.5);
+
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = Math.max(1.5, s * 0.06);
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      ctx.stroke();
+    }
+
+    // Draw all sizes
+    ['icon16', 'icon48', 'icon128'].forEach(id => {
+      const canvas = document.getElementById(id);
+      drawShieldIcon(canvas);
+      
+      // Set download link
+      const size = id.replace('icon', '');
+      const link = document.getElementById('dl' + size);
+      link.href = canvas.toDataURL('image/png');
+    });
+  </script>
+</body>
+</html>

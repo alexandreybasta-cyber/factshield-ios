@@ -1,0 +1,148 @@
+/* FactShield Side Panel — Custom Styles */
+
+/* Pulse animation for verifying state */
+@keyframes pulse-verify {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+.animate-pulse-verify {
+  animation: pulse-verify 1.5s ease-in-out infinite;
+}
+
+/* Slide-in animation for verdict cards */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-in {
+  animation: slide-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Confidence meter fill animation */
+@keyframes fill-meter {
+  from { width: 0%; }
+  to { width: var(--fill-width, 0%); }
+}
+.confidence-fill {
+  animation: fill-meter 0.8s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  width: var(--fill-width, 0%);
+}
+
+/* Fade-in keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Status dot blinking animation */
+@keyframes blink-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.animate-blink {
+  animation: blink-dot 1.2s ease-in-out infinite;
+}
+
+/* Progress bar animated gradient */
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.progress-gradient {
+  background: linear-gradient(90deg, #3B82F6, #8B5CF6, #3B82F6);
+  background-size: 200% 100%;
+  animation: gradient-move 2s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 1.5s linear infinite;
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #0F172A;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Card hover effects */
+.verdict-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.verdict-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: #475569;
+}
+
+/* Expandable sections */
+.expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  opacity: 0;
+}
+.expandable-content.expanded {
+  max-height: 500px;
+  opacity: 1;
+}
+
+/* Button press effect */
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Toast notification */
+@keyframes toast-in {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+@keyframes toast-out {
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100%); opacity: 0; }
+}
+.toast-enter {
+  animation: toast-in 0.3s ease-out forwards;
+}
+.toast-exit {
+  animation: toast-out 0.3s ease-in forwards;
+}
+
+/* Glow effect for active state */
+.glow-active {
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Shimmer loading skeleton */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #1E293B 25%, #334155 50%, #1E293B 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

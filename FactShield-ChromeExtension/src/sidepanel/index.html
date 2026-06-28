@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FactShield</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            fs: {
+              bg: '#0F172A',
+              card: '#1E293B',
+              text: '#F8FAFC',
+              muted: '#94A3B8',
+              accent: '#3B82F6',
+              border: '#334155',
+              true: '#10B981',
+              'sub-true': '#14B8A6',
+              misleading: '#F59E0B',
+              false: '#EF4444',
+              unverifiable: '#6B7280',
+            }
+          },
+          fontFamily: {
+            sans: ['system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif']
+          },
+          maxWidth: {
+            panel: '400px'
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-fs-bg text-fs-text font-sans min-h-screen max-w-panel mx-auto overflow-hidden">
+  <div id="app" class="flex flex-col h-screen"></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
