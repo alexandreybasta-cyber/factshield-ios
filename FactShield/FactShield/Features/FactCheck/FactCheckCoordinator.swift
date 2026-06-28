@@ -23,6 +23,10 @@ final class FactCheckCoordinator {
     var isRunning: Bool = false
     var elapsedSeconds: Int = 0
     
+    // History for the session
+    var allClaims: [Claim] = []
+    var allVerdicts: [Verdict] = []
+    
     // Timers
     private var extractionTimer: Timer?
     private var elapsedTimer: Timer?
@@ -103,6 +107,9 @@ final class FactCheckCoordinator {
             
             currentClaim = claim
             sessionTranscript = transcript
+            if !allClaims.contains(where: { $0.text == claim.text }) {
+                allClaims.append(claim)
+            }
             
             // Update activity: searching
             await updateActivity(status: .searching, claimText: claim.text)
@@ -110,8 +117,21 @@ final class FactCheckCoordinator {
             // Step 2: Retrieve evidence
             let evidence = try await evidenceRetriever.retrieveEvidence(for: claim)
             
-            guard !evidence.isEmpty else {
-                await updateActivity(status: .complete, claimText: claim.text)
+            // If no evidence found, use model knowledge as fallback
+            if evidence.isEmpty {
+                await updateActivity(status: .verifying, claimText: claim.text)
+                let verdict = try await verdictSynthesizer.synthesizeVerdictWithoutEvidence(claim: claim)
+                currentVerdict = verdict
+                allVerdicts.append(verdict)
+                await updateActivity(
+                    status: .complete,
+                    claimText: claim.text,
+                    verdict: verdict.verdictType.toActivityType(),
+                    confidence: verdict.confidenceScore,
+                    sourceCount: 0,
+                    reasoning: verdict.reasoning
+                )
+                logger.info("Verdict (no evidence): \(verdict.verdictType.rawValue)")
                 return
             }
             
@@ -121,6 +141,7 @@ final class FactCheckCoordinator {
             // Step 3: Synthesize verdict
             let verdict = try await verdictSynthesizer.synthesizeVerdict(claim: claim, evidence: evidence)
             currentVerdict = verdict
+            allVerdicts.append(verdict)
             
             // Update activity: complete
             await updateActivity(

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
+    @State private var coordinator = FactCheckCoordinator.shared
     @State private var showSession = false
     
     var body: some View {
@@ -8,8 +9,29 @@ struct HomeView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     // Hero section
-                    HeroCard {
-                        showSession = true
+                    HeroCard(isRunning: coordinator.isRunning) {
+                        if coordinator.isRunning {
+                            showSession = true
+                        } else {
+                            Task {
+                                try? await AudioSessionManager.shared.configureForCapture()
+                                AudioCaptureService.shared.startListening()
+                                SpeechRecognitionService.shared.startRecognition()
+                                try? await ActivityManager.shared.startLiveActivity()
+                                coordinator.startSession()
+                                showSession = true
+                            }
+                        }
+                    }
+                    
+                    // Active session banner
+                    if coordinator.isRunning {
+                        ActiveSessionBanner(
+                            elapsedSeconds: coordinator.elapsedSeconds,
+                            currentClaim: coordinator.currentClaim?.text
+                        ) {
+                            showSession = true
+                        }
                     }
                     
                     // How it works
@@ -21,15 +43,81 @@ struct HomeView: View {
                 .padding()
             }
             .navigationTitle("FactShield")
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    NavigationLink(destination: SettingsView()) {
+                        Image(systemName: "gearshape.fill")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
             .sheet(isPresented: $showSession) {
-                Text("Fact-Check Session")
-                    .font(.title)
+                FactCheckSessionView()
             }
         }
     }
 }
 
+// MARK: - Active Session Banner
+
+struct ActiveSessionBanner: View {
+    let elapsedSeconds: Int
+    let currentClaim: String?
+    let onTap: () -> Void
+    
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(.green)
+                    .frame(width: 10, height: 10)
+                    .overlay(
+                        Circle()
+                            .fill(.green.opacity(0.3))
+                            .frame(width: 20, height: 20)
+                    )
+                
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Session Active")
+                        .font(.subheadline.bold())
+                    if let claim = currentClaim {
+                        Text(claim)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                    } else {
+                        Text("Listening for claims...")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                
+                Spacer()
+                
+                Text("\(elapsedSeconds)s")
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
+                
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding()
+            .background(.green.opacity(0.1))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .stroke(.green.opacity(0.3), lineWidth: 1)
+            )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Hero Card
+
 struct HeroCard: View {
+    let isRunning: Bool
     let onStart: () -> Void
     
     var body: some View {
@@ -37,6 +125,7 @@ struct HeroCard: View {
             Image(systemName: "checkmark.shield.fill")
                 .font(.system(size: 48))
                 .foregroundStyle(.blue.gradient)
+                .symbolEffect(.pulse, isActive: isRunning)
             
             Text("Live Fact-Checking")
                 .font(.title2.bold())
@@ -46,20 +135,34 @@ struct HeroCard: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             
-            Button(action: onStart) {
-                Label("Start Fact-Checking", systemImage: "play.fill")
-                    .font(.headline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
+            if !isRunning {
+                Button(action: onStart) {
+                    Label("Start Fact-Checking", systemImage: "play.fill")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+            } else {
+                Button(action: onStart) {
+                    Label("Session Active", systemImage: "waveform")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .tint(.green)
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.large)
         }
         .padding(24)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }
+
+// MARK: - How It Works
 
 struct HowItWorksSection: View {
     var body: some View {
@@ -103,6 +206,8 @@ struct StepRow: View {
         }
     }
 }
+
+// MARK: - Recent History
 
 struct RecentHistorySection: View {
     var body: some View {
