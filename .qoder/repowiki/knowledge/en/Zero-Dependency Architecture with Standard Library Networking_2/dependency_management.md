@@ -1,16 +1,23 @@
-The FactShield repository employs a **zero-dependency architecture** for its core iOS application, relying exclusively on Apple's native frameworks and the Swift Standard Library. This strategy minimizes supply chain risks, reduces binary size, and simplifies the build process by eliminating the need for external package managers like CocoaPods or Swift Package Manager (SPM) dependencies.
+The FactShield repository employs a **zero-dependency** strategy for its core application logic, relying exclusively on Apple's native frameworks and standard library capabilities. 
 
-### iOS Dependency Strategy
-- **No External Packages**: The `FactShield/Package.swift` file explicitly defines an empty `dependencies: []` array. All functionality is implemented using native iOS APIs such as `AVFoundation` for audio, `Speech` for recognition, `ActivityKit` for Live Activities, and `Foundation` for networking.
-- **Custom Networking Layer**: Instead of using third-party libraries like Alamofire or Moya, the project implements a custom `APIClient` actor (`FactShield/Core/Network/APIClient.swift`). This client handles HTTP requests, JSON serialization, and robust retry logic with exponential backoff using only `URLSession`.
-- **Native AI Integration**: Interactions with Large Language Models (Qwen) are handled via direct HTTP calls to the DashScope API, encapsulated in `QwenAPI.swift`, avoiding specialized AI SDKs.
+### System Approach
+- **Package Manager**: The project uses Swift Package Manager (SPM) as indicated by the `Package.swift` file. However, the `dependencies` array is explicitly empty (`[]`), confirming that no third-party libraries are declared or managed via SPM.
+- **Networking**: Instead of popular third-party networking libraries like Alamofire or AFNetworking, the project implements a custom, actor-based `APIClient` using `URLSession` and `async/await`. This client handles JSON serialization, error handling, and exponential backoff retries internally.
+- **Concurrency & State**: The app leverages Apple's native `Combine` framework for reactive state management (e.g., in `FactCheckCoordinator`) and `OSLog` for structured logging, avoiding external dependencies for these common concerns.
 
-### Chrome Extension Dependency Strategy
-- **Vanilla JavaScript**: The `FactShield-ChromeExtension` is built using vanilla JavaScript (ES Modules) without any frontend frameworks (e.g., React, Vue) or build tools (e.g., Webpack, Vite).
-- **Manifest V3 Compliance**: Dependencies are limited to standard Chrome Extension APIs (`chrome.storage`, `chrome.sidePanel`, etc.) defined in `manifest.json`. 
-- **Direct API Consumption**: The extension communicates directly with external services (Tavily, Google Fact Check, Qwen) via `fetch` API calls, managing API keys through `chrome.storage.local` rather than relying on backend proxy services or SDKs.
+### Key Files
+- `FactShield/Package.swift`: Defines the package structure with an empty dependency list.
+- `FactShield/FactShield/Core/Network/APIClient.swift`: A custom, robust networking layer implementing retry logic and error handling without external tools.
+- `FactShield/FactShield/Core/Network/QwenAPI.swift` & `SearchAPI.swift`: Service-specific API clients built on top of the custom `APIClient`.
+- `FactShield/FactShield/Utilities/Constants.swift`: Centralizes configuration constants, including API base URLs, reducing the need for external configuration libraries.
 
-### Key Conventions
-- **Standard Library First**: Developers are expected to leverage native Swift and JavaScript capabilities before considering any external integration.
-- **Manual API Management**: API keys for third-party services (Qwen, Tavily, Google) are managed manually via user configuration (UserDefaults on iOS, Options page on Chrome) rather than through environment variable injection during a build step.
-- **No Lockfiles**: Due to the absence of package managers, there are no `Package.resolved`, `Podfile.lock`, or `package-lock.json` files in the repository.
+### Architecture and Conventions
+- **Self-Contained Network Layer**: The `APIClient` is implemented as a singleton `actor`, ensuring thread-safe access to the shared `URLSession`. It provides generic methods for both typed decoding (`Decodable`) and raw JSON dictionary responses, offering flexibility without external JSON parsing libraries like SwiftyJSON.
+- **Protocol-Oriented Search**: The `SearchAPI.swift` file defines a `SearchProvider` protocol, allowing for interchangeable search implementations (e.g., Tavily, Google Fact Check) while maintaining a consistent internal interface. This promotes testability and modularity without requiring a dependency injection framework.
+- **Environment-Based Configuration**: API keys and sensitive configurations are retrieved from `ProcessInfo.processInfo.environment` or `UserDefaults`, adhering to standard iOS security practices without needing external secrets management libraries.
+
+### Rules for Developers
+1. **No Third-Party Libraries**: Do not add new dependencies to `Package.swift` unless absolutely necessary and approved. The project aims to minimize supply chain risk and build complexity by using native Apple frameworks.
+2. **Use Native Networking**: All HTTP requests must go through the existing `APIClient` actor. Do not create ad-hoc `URLSession` instances; instead, extend the `APIClient` if new features (like multipart uploads) are needed.
+3. **Standard Library First**: Prefer `Foundation`, `Combine`, and `OSLog` for common tasks. Avoid introducing external libraries for JSON parsing, logging, or dependency injection.
+4. **Configuration Management**: Add new API endpoints or configuration values to `Constants.swift` or use environment variables for secrets. Do not hardcode URLs or keys in service files.

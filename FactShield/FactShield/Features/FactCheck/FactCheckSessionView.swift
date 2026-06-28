@@ -47,20 +47,13 @@ struct FactCheckSessionView: View {
                         Button("Stop") {
                             Task {
                                 await coordinator.stopSession()
-                                AudioCaptureService.shared.stopListening()
-                                SpeechRecognitionService.shared.stopRecognition()
-                                try? await AudioSessionManager.shared.deactivate()
                             }
                         }
                         .foregroundStyle(.red)
                     } else {
                         Button("Start") {
                             Task {
-                                try? await AudioSessionManager.shared.configureForCapture()
-                                AudioCaptureService.shared.startListening()
-                                SpeechRecognitionService.shared.startRecognition()
-                                try? await ActivityManager.shared.startLiveActivity()
-                                coordinator.startSession()
+                                await coordinator.startSession()
                             }
                         }
                     }

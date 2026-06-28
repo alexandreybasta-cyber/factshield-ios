@@ -108,17 +108,20 @@ private struct ExpandedLeadingView: View {
     let context: ActivityViewContext<FactCheckAttributes>
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 4) {
             Image(systemName: "waveform.circle.fill")
-                .font(.title2)
-                .foregroundStyle(.blue)
+                .font(.title3)
+                .foregroundStyle(.orange)
                 .symbolEffect(.pulse, isActive: context.state.status != .complete)
             
             Text(context.state.claimText ?? context.state.status.rawValue)
-                .font(.caption)
+                .font(.caption2)
                 .lineLimit(2)
+                .minimumScaleFactor(0.7)
                 .foregroundStyle(.primary)
         }
+        .padding(.leading, 4)
+        .padding(.vertical, 4)
     }
 }
 
@@ -128,18 +131,23 @@ private struct ExpandedTrailingView: View {
     let context: ActivityViewContext<FactCheckAttributes>
     
     var body: some View {
-        VStack(alignment: .trailing, spacing: 6) {
+        VStack(alignment: .trailing, spacing: 4) {
             Text("\(context.state.elapsedSeconds)s")
-                .font(.caption.bold())
+                .font(.caption2.bold())
                 .monospacedDigit()
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
             
             if context.state.confidenceScore > 0 {
                 Text("\(Int(context.state.confidenceScore * 100))%")
                     .font(.caption2.bold())
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(.orange)
+                    .lineLimit(1)
             }
         }
+        .padding(.trailing, 4)
+        .padding(.vertical, 4)
     }
 }
 
@@ -149,27 +157,32 @@ private struct ExpandedBottomView: View {
     let context: ActivityViewContext<FactCheckAttributes>
     
     var body: some View {
-        HStack(spacing: 12) {
-            // Verdict display with colored icon
+        HStack(spacing: 8) {
+            // Verdict badge (compact)
             if let verdict = context.state.verdict {
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Image(systemName: verdict.icon)
+                        .font(.caption2)
                         .foregroundStyle(verdict.color)
                     Text(verdict.rawValue)
-                        .font(.caption.bold())
+                        .font(.caption2.bold())
                         .foregroundStyle(verdict.color)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
                 .background(verdict.color.opacity(0.15), in: Capsule())
             } else {
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Image(systemName: "waveform")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                     Text(context.state.status.rawValue)
-                        .font(.caption)
+                        .font(.caption2)
                         .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.7)
                 }
             }
             
@@ -177,19 +190,21 @@ private struct ExpandedBottomView: View {
             
             // Stop button triggers StopFactCheckIntent
             Button(intent: StopFactCheckIntent()) {
-                HStack(spacing: 4) {
+                HStack(spacing: 3) {
                     Image(systemName: "stop.fill")
                         .font(.caption2)
                     Text("Stop")
-                        .font(.caption.bold())
+                        .font(.caption2.bold())
                 }
                 .foregroundStyle(.white)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
                 .background(.red, in: Capsule())
             }
             .buttonStyle(.plain)
         }
+        .padding(.horizontal, 4)
+        .padding(.vertical, 2)
     }
 }
 
@@ -244,222 +259,5 @@ private struct LockScreenBannerView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-    }
-}
-import WidgetKit
-import SwiftUI
-import ActivityKit
-
-struct FactShieldLiveActivityWidget: Widget {
-    var body: some WidgetConfiguration {
-        ActivityConfiguration(for: FactCheckAttributes.self) { context in
-            // Lock screen / banner presentation
-            lockScreenView(context: context)
-        } dynamicIsland: { context in
-            DynamicIsland {
-                // Expanded layout (when user long-presses the island)
-                DynamicIslandExpandedRegion(.leading) {
-                    expandedLeading(context: context)
-                }
-                DynamicIslandExpandedRegion(.trailing) {
-                    expandedTrailing(context: context)
-                }
-                DynamicIslandExpandedRegion(.center) {
-                    expandedCenter(context: context)
-                }
-                DynamicIslandExpandedRegion(.bottom) {
-                    expandedBottom(context: context)
-                }
-            } compactLeading: {
-                compactLeading(context: context)
-            } compactTrailing: {
-                compactTrailing(context: context)
-            } minimal: {
-                minimalView(context: context)
-            }
-        }
-    }
-    
-    // MARK: - Lock Screen View
-    @ViewBuilder
-    private func lockScreenView(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        VStack(spacing: 8) {
-            HStack {
-                Image(systemName: "checkmark.shield.fill")
-                    .foregroundStyle(.blue)
-                Text("FactShield")
-                    .font(.headline)
-                Spacer()
-                Text(context.state.status.rawValue)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            if let claim = context.state.claimText {
-                Text(claim)
-                    .font(.subheadline)
-                    .lineLimit(2)
-            }
-            
-            if let verdict = context.state.verdict {
-                HStack {
-                    VerdictBadge(verdict: verdict, confidence: context.state.confidenceScore)
-                    Spacer()
-                    Text("\(context.state.sourceCount) sources")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-        .padding()
-        .background(.black.opacity(0.8))
-    }
-    
-    // MARK: - Dynamic Island: Compact Leading
-    @ViewBuilder
-    private func compactLeading(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        Image(systemName: "checkmark.shield.fill")
-            .foregroundStyle(statusColor(context.state.status))
-            .symbolEffect(.pulse, isActive: context.state.status != .complete)
-    }
-    
-    // MARK: - Dynamic Island: Compact Trailing
-    @ViewBuilder
-    private func compactTrailing(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        if let verdict = context.state.verdict {
-            Text(verdict.rawValue)
-                .font(.caption2.bold())
-                .foregroundStyle(verdictColor(verdict))
-        } else {
-            Text(context.state.status.rawValue)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-    }
-    
-    // MARK: - Dynamic Island: Minimal
-    @ViewBuilder
-    private func minimalView(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        Image(systemName: "checkmark.shield.fill")
-            .foregroundStyle(statusColor(context.state.status))
-            .symbolEffect(.pulse, isActive: context.state.status != .complete)
-    }
-    
-    // MARK: - Dynamic Island: Expanded Regions
-    @ViewBuilder
-    private func expandedLeading(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text("FactShield")
-                .font(.caption2.bold())
-            Text(context.state.status.rawValue)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-    }
-    
-    @ViewBuilder
-    private func expandedTrailing(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        VStack(alignment: .trailing, spacing: 2) {
-            if let verdict = context.state.verdict {
-                Text(verdict.rawValue)
-                    .font(.caption2.bold())
-                    .foregroundStyle(verdictColor(verdict))
-                Text("\(Int(context.state.confidenceScore * 100))% confident")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("\(context.state.elapsedSeconds)s")
-                    .font(.caption2.monospacedDigit())
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func expandedCenter(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        VStack(spacing: 4) {
-            if let claim = context.state.claimText {
-                Text(claim)
-                    .font(.caption)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.center)
-            }
-        }
-    }
-    
-    @ViewBuilder
-    private func expandedBottom(context: ActivityViewContext<FactCheckAttributes>) -> some View {
-        HStack {
-            if let verdict = context.state.verdict {
-                VerdictBadge(verdict: verdict, confidence: context.state.confidenceScore)
-                
-                Spacer()
-                
-                if let reasoning = context.state.reasoningSummary {
-                    Text(reasoning)
-                        .font(.caption2)
-                        .lineLimit(2)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Text("Analyzing...")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-    
-    // MARK: - Helper Views
-    private func statusColor(_ status: FactCheckAttributes.VerificationStatus) -> Color {
-        switch status {
-        case .listening: return .blue
-        case .transcribing: return .cyan
-        case .extracting: return .orange
-        case .searching: return .purple
-        case .verifying: return .yellow
-        case .complete: return .green
-        }
-    }
-    
-    private func verdictColor(_ verdict: FactCheckAttributes.VerdictType) -> Color {
-        switch verdict {
-        case .true: return .green
-        case .substantiallyTrue: return .yellow
-        case .misleading: return .orange
-        case .false: return .red
-        case .unverifiable: return .gray
-        }
-    }
-}
-
-struct VerdictBadge: View {
-    let verdict: FactCheckAttributes.VerdictType
-    let confidence: Double
-    
-    var body: some View {
-        HStack(spacing: 4) {
-            Circle()
-                .fill(verdictColor(verdict))
-                .frame(width: 8, height: 8)
-            Text(verdict.rawValue)
-                .font(.caption2.bold())
-            Text("\(Int(confidence * 100))%")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(verdictColor(verdict).opacity(0.15))
-        .clipShape(Capsule())
-    }
-    
-    private func verdictColor(_ verdict: FactCheckAttributes.VerdictType) -> Color {
-        switch verdict {
-        case .true: return .green
-        case .substantiallyTrue: return .yellow
-        case .misleading: return .orange
-        case .false: return .red
-        case .unverifiable: return .gray
-        }
     }
 }

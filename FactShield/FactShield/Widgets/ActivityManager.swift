@@ -14,9 +14,21 @@ final class ActivityManager {
     
     @MainActor
     func startLiveActivity(captureMode: FactCheckAttributes.CaptureMode = .microphone, sourceApp: String? = nil) async throws {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else {
-            logger.error("Live Activities not enabled")
+        logger.info("startLiveActivity() called")
+        
+        let authInfo = ActivityAuthorizationInfo()
+        logger.info("areActivitiesEnabled: \(authInfo.areActivitiesEnabled)")
+        
+        guard authInfo.areActivitiesEnabled else {
+            logger.error("Live Activities not enabled — user must enable in Settings > FactShield > Live Activities")
             throw ActivityError.notEnabled
+        }
+        
+        // End any existing activity first
+        if let existing = currentActivity {
+            logger.info("Ending existing activity before starting new one: \(existing.id)")
+            await existing.end(nil, dismissalPolicy: .immediate)
+            currentActivity = nil
         }
         
         let attributes = FactCheckAttributes(
@@ -40,11 +52,11 @@ final class ActivityManager {
         let activity = try Activity.request(
             attributes: attributes,
             content: .init(state: initialState, staleDate: nil),
-            pushType: .token  // Enable APNs push updates
+            pushType: nil  // Local updates only (no APNs required)
         )
         
         currentActivity = activity
-        logger.info("Live Activity started with push token: \(activity.pushToken?.hexString ?? "none")")
+        logger.info("Live Activity started: id=\(activity.id)")
     }
     
     @MainActor

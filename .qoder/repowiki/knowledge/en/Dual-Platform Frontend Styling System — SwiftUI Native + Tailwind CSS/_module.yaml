@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: frontend_style
+title: Dual-Platform Frontend Styling System — SwiftUI Native + Tailwind CSS
+scope: []
+source_files:
+    - FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift
+    - FactShield/FactShield/Features/Home/HomeView.swift
+    - FactShield/FactShield/Features/Settings/SettingsView.swift
+    - FactShield/FactShield/App/FactShieldApp.swift
+    - FactShield-ChromeExtension/src/sidepanel/index.html
+    - FactShield-ChromeExtension/src/sidepanel/styles.css
+    - FactShield-ChromeExtension/src/sidepanel/app.js
+depends_on: []
+related_to: []

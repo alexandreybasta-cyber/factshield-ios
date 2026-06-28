@@ -1,47 +1,11 @@
 ## Overview
 
-FactShield uses a **two-layer configuration system** that prioritizes environment variables for development/testing and falls back to `UserDefaults` (iOS) or `chrome.storage.local` (Chrome Extension) for user-managed runtime settings. There is no dedicated configuration file format (e.g., `.env`, `.yaml`, `.toml`) — all configuration is managed through platform-native storage mechanisms.
+FactShield uses a **two-layer configuration approach** combining `UserDefaults` (for user-managed settings) and environment variables via `ProcessInfo.processInfo.environment` (for secrets/developer overrides). There is no dedicated configuration framework, YAML/TOML files, or `.env` file parsing. Configuration is managed through:
 
----
-
-## Architecture & Layering Strategy
-
-### iOS App (`FactShield/FactShield/`)
-
-The iOS app implements a **priority-based layering pattern** for API keys:
-
-1. **Environment Variables (highest priority)** — Read via `ProcessInfo.processInfo.environment["KEY_NAME"]`
-2. **UserDefaults (fallback)** — Read via `UserDefaults.standard.string(forKey: "key_name")`
-
-This pattern is applied consistently across three API providers:
-
-| Provider | Env Var Key | UserDefaults Key | File |
-|----------|-------------|------------------|------|
-| Qwen | `QWEN_API_KEY` | `qwen_api_key` | `Core/Network/QwenAPI.swift:78-81` |
-| Tavily | `TAVILY_API_KEY` | `tavily_api_key` | `Core/Network/SearchAPI.swift:41-42` |
-| Google Fact Check | `GOOGLE_FACTCHECK_API_KEY` | `google_factcheck_api_key` | `Core/Network/SearchAPI.swift:113-114` |
-
-**Settings UI**: The `SettingsView` uses SwiftUI's `@AppStorage` property wrapper, which automatically syncs with `UserDefaults`. This provides a unified read/write interface for user-facing configuration.
-
-```swift
-@AppStorage("qwen_api_key") private var qwenAPIKey: String = ""
-@AppStorage("extraction_interval") private var extractionInterval: Double = 15.0
-```
-
-**Cross-process sharing**: The Broadcast Extension uses `UserDefaults(suiteName: Constants.appGroupIdentifier)` with the App Group identifier `"group.com.factshield.shared"` to share state (e.g., `isBroadcasting`, `broadcastStartedAt`) between the main app and the ReplayKit extension.
-
-### Chrome Extension (`FactShield-ChromeExtension/`)
-
-The Chrome Extension uses `chrome.storage.local` as its sole persistent configuration store. Configuration is managed through:
-
-- **Options page** (`src/options/options.js`): Full settings UI for API keys and preferences
-- **Shared constants** (`src/shared/constants.js`): Defines `STORAGE_KEYS` for consistent key naming
-- **Background service worker** (`src/background/service-worker.js`): Reads config at runtime
-
-Stored keys:
-- `qwen_api_key`, `tavily_api_key`, `google_factcheck_api_key` — API credentials
-- `factshield_settings` — Nested object containing `enableHighlights`, `showNotifications`, `autoStartYoutube`, `extractionInterval`, `evidenceDepth`
-- `factshield_history` — Runtime data (claim history)
+1. **Hardcoded constants** (`Constants.swift`) for immutable app-level values
+2. **`@AppStorage`-backed UserDefaults** for user-facing settings in SettingsView
+3. **Environment variable fallbacks** for API keys (checked first, then fall back to UserDefaults)
+4. **`Info.plist`** for iOS system permissions and background modes
 
 ---
 
@@ -49,63 +13,85 @@ Stored keys:
 
 | File | Purpose |
 |------|---------|
-| `FactShield/FactShield/Core/Network/QwenAPI.swift` | Qwen API key resolution (env → UserDefaults) |
-| `FactShield/FactShield/Core/Network/SearchAPI.swift` | Tavily & Google API key resolution (env → UserDefaults) |
-| `FactShield/FactShield/Features/Settings/SettingsView.swift` | iOS settings UI using `@AppStorage` |
-| `FactShield/FactShield/Utilities/Constants.swift` | Static constants (URLs, intervals, UserDefaults key names) |
-| `FactShield/FactShield/Resources/Info.plist` | iOS permissions and background mode declarations |
-| `FactShield-ChromeExtension/src/options/options.js` | Chrome Extension settings UI and `chrome.storage.local` management |
-| `FactShield-ChromeExtension/src/shared/constants.js` | Shared constants including `STORAGE_KEYS` enum |
-| `FactShield-ChromeExtension/manifest.json` | Extension permissions and host allowlist |
+| `FactShield/FactShield/Utilities/Constants.swift` | Static app-level constants (bundle IDs, API base URLs, audio parameters, pipeline intervals, UserDefaults key names) |
+| `FactShield/FactShield/Features/Settings/SettingsView.swift` | User-facing settings UI; all mutable config persisted via `@AppStorage` to UserDefaults |
+| `FactShield/FactShield/Core/Network/QwenAPI.swift` | Qwen API client; reads `QWEN_API_KEY` from env var or UserDefaults |
+| `FactShield/FactShield/Core/Network/SearchAPI.swift` | Tavily and Google Fact Check providers; read respective API keys from env vars or UserDefaults |
+| `FactShield/FactShield/Resources/Info.plist` | iOS permission descriptions, background modes, Siri intent declarations |
+| `FactShield/FactShield/App/AppState.swift` | Runtime state holder (not persistent config, but observable app state) |
 
 ---
 
-## Conventions & Developer Rules
+## Architecture & Conventions
 
-### 1. API Key Resolution Pattern (iOS)
-Always use the **environment-first, UserDefaults-fallback** pattern for sensitive keys:
+### 1. Constants for Immutable Values
+
+`Constants.swift` centralizes all compile-time configuration:
+- App group identifier: `group.com.factshield.shared`
+- Bundle IDs for main app and broadcast extension
+- API base URL: `https://dashscope-intl.aliyuncs.com/compatible-mode/v1`
+- Audio defaults: sample rate (16000 Hz), buffer size (1024), max recording duration (5 min)
+- Speech recognition limits: max transcript words (2000), recent window (75 words)
+- Pipeline timing: claim extraction interval (15s), source count bounds (3–5)
+- UserDefaults key strings (e.g., `"isBroadcasting"`, `"qwen_api_key"`)
+- Notification names
+
+This pattern avoids magic strings scattered across the codebase.
+
+### 2. UserDefaults via `@AppStorage` for User Settings
+
+All user-configurable settings live in `SettingsView` and use SwiftUI's `@AppStorage` property wrapper, which automatically persists to `UserDefaults.standard`. Configurable items include:
+
+- **API Keys**: `qwen_api_key`, `tavily_api_key`, `google_factcheck_api_key` (stored as plain strings in SecureFields)
+- **Audio preferences**: `preferred_capture_mode` ("microphone" or "replaykit"), `on_device_recognition` (Bool)
+- **Pipeline tuning**: `extraction_interval` (Double, 5–60s slider)
+- **Feature flags**: `auto_start_live_activity` (Bool)
+
+The `@AppStorage` wrapper provides automatic two-way binding between UI and persistence.
+
+### 3. Environment Variable Fallback for Secrets
+
+API keys follow a **layered lookup pattern** in each network client:
 
 ```swift
 private var apiKey: String {
-    ProcessInfo.processInfo.environment["API_KEY_NAME"] ?? 
-    UserDefaults.standard.string(forKey: "api_key_name") ?? ""
+    if let envKey = ProcessInfo.processInfo.environment["QWEN_API_KEY"], !envKey.isEmpty {
+        return envKey
+    }
+    return UserDefaults.standard.string(forKey: "qwen_api_key") ?? ""
 }
 ```
 
-Do **not** hardcode API keys in source files. The codebase explicitly notes: *"in production use Keychain"* — the current approach is suitable for development but should migrate to Keychain for production releases.
+This same pattern is repeated in:
+- `QwenAPI.swift` → `QWEN_API_KEY`
+- `SearchAPI.swift` (Tavily) → `TAVILY_API_KEY`
+- `SearchAPI.swift` (Google) → `GOOGLE_FACTCHECK_API_KEY`
 
-### 2. UserDefaults Key Naming
-- Use **snake_case** for UserDefaults keys (e.g., `qwen_api_key`, `extraction_interval`)
-- Define key constants in `Constants.swift` when used across multiple files
-- Use `@AppStorage` in SwiftUI views for automatic binding
+**Priority order**: Environment variable > UserDefaults > empty string (which triggers `APIError.noAPIKey`).
 
-### 3. Cross-Extension State Sharing (iOS)
-When sharing state between the main app and Broadcast Extension:
-- Use `UserDefaults(suiteName: Constants.appGroupIdentifier)` with the App Group ID
-- Both targets must declare the same App Group in their entitlements
+This enables developers to inject secrets at runtime (e.g., via Xcode scheme environment variables or CI pipelines) without persisting them to disk.
 
-### 4. Chrome Extension Storage
-- Always use `chrome.storage.local` (not `sync` or `session`) for persistence
-- Wrap storage access in `try/catch` since it may fail outside extension context
-- Use the `STORAGE_KEYS` constant object from `shared/constants.js` to avoid typos
+### 4. Info.plist for System-Level Configuration
 
-### 5. Static Configuration
-Non-user-configurable values (URLs, timeouts, thresholds) live in:
-- `Constants.swift` (iOS)
-- `shared/constants.js` (Chrome Extension)
+Standard iOS `Info.plist` entries cover:
+- Permission usage descriptions (`NSMicrophoneUsageDescription`, `NSSpeechRecognitionUsageDescription`)
+- Background modes: `audio`, `fetch`, `remote-notification`
+- Siri shortcut intent types
 
-These are compile-time constants, not runtime-configurable.
-
-### 6. No `.env` File Support
-The iOS app reads environment variables set at **process launch time** (e.g., via Xcode scheme environment variables or CI injection). There is no `.env` file parsing library. To configure locally:
-- **Xcode**: Edit the scheme → Arguments → Environment Variables
-- **CI/CD**: Set env vars in the build environment
+No custom plist keys are defined beyond Apple's standard ones.
 
 ---
 
-## Security Notes
+## Rules Developers Should Follow
 
-- API keys stored in `UserDefaults` are **not encrypted** — they are plaintext in the app sandbox
-- The codebase acknowledges this limitation with the comment: *"in production use Keychain"*
-- Chrome Extension stores keys in `chrome.storage.local`, which is scoped to the extension but also unencrypted at rest
-- The `SecureInputField` component in SettingsView only masks input visually; it does not provide cryptographic protection
+1. **Add new immutable constants to `Constants.swift`** — never hardcode magic numbers, URLs, or key strings inline.
+
+2. **Use `@AppStorage` for user-facing settings** — this ensures automatic persistence and UI reactivity. Define the UserDefaults key string in `Constants` to avoid typos.
+
+3. **For API keys/secrets, implement the env-var-first fallback pattern** — check `ProcessInfo.processInfo.environment["KEY_NAME"]` first, then fall back to `UserDefaults.standard.string(forKey:)`. This supports both developer workflows (Xcode schemes) and production (user-entered keys).
+
+4. **Do NOT commit API keys to source control** — the codebase explicitly notes "in production, use Keychain" in comments. Current storage in UserDefaults is plaintext; migration to Keychain is a known TODO.
+
+5. **No external config files** — there are no `.yaml`, `.toml`, `.json`, or `.env` files parsed at runtime. All configuration is either compiled-in (Constants), user-set (UserDefaults), or injected via process environment.
+
+6. **UserDefaults key naming convention** — snake_case with descriptive suffixes (e.g., `qwen_api_key`, `extraction_interval`, `auto_start_live_activity`). Always define the key string in `Constants` before using it.

@@ -11,8 +11,18 @@
 - [Constants.swift](file://FactShield/FactShield/Utilities/Constants.swift)
 - [AppState.swift](file://FactShield/FactShield/App/AppState.swift)
 - [SampleHandler.swift](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift)
+- [Logger.swift](file://FactShield/FactShield/Utilities/Logger.swift)
 - [FactShield-iOS-BuildInstructions.md](file://FactShield-iOS-BuildInstructions.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Enhanced AudioCaptureService with improved buffer monitoring and debugging capabilities
+- Updated AudioSessionManager with comprehensive error handling and permission management
+- Improved SpeechRecognitionService with seamless restart mechanisms and buffer management
+- Added centralized logging infrastructure with structured categories
+- Enhanced buffer processing with optimized memory management
+- Updated system audio capture capabilities in Broadcast Extension
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -20,99 +30,92 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
+6. [Enhanced Error Handling and Debugging](#enhanced-error-handling-and-debugging)
+7. [Performance Optimizations](#performance-optimizations)
 8. [Troubleshooting Guide](#troubleshooting-guide)
 9. [Conclusion](#conclusion)
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the audio processing services responsible for real-time audio capture and processing in the FactShield iOS application. It covers:
-- Audio capture via the microphone using AVAudioEngine and a tap installed on the input node
-- Buffer management and format handling for speech recognition
-- Audio session lifecycle management with echo cancellation and concurrent playback support
-- Integration with speech recognition and transcript management
-- Practical setup examples, buffer processing workflows, and integration patterns
-- Error handling strategies for interruptions, permissions, and hardware conflicts
+This document explains the enhanced audio processing services responsible for real-time audio capture and processing in the FactShield iOS application. The system has been significantly improved with enhanced reliability, comprehensive error handling, and advanced debugging capabilities. Key improvements include:
+
+- **Enhanced AudioCaptureService**: Improved buffer monitoring with automatic detection of audio flow issues
+- **Comprehensive AudioSessionManager**: Advanced permission handling and error management
+- **Robust SpeechRecognitionService**: Seamless restart mechanisms and buffer management
+- **Centralized Logging Infrastructure**: Structured logging across all audio components
+- **Optimized Buffer Processing**: Memory-efficient buffer management with configurable limits
+- **Enhanced System Audio Capture**: Improved Broadcast Extension with better error handling
 
 ## Project Structure
-The audio pipeline spans several modules:
-- Core Audio: capture, buffer processing, and session management
-- Speech: speech recognition and transcript management
-- Broadcast Extension: system audio capture for screen broadcasts
-- App state and models: global state and audio quality configuration
+The audio pipeline now features enhanced modularity with comprehensive error handling and debugging:
 
 ```mermaid
 graph TB
-subgraph "Core Audio"
-ACS["AudioCaptureService"]
-ABP["AudioBufferProcessor"]
-ASM["AudioSessionManager"]
+subgraph "Core Audio Layer"
+ACS["AudioCaptureService<br/>Enhanced Buffer Monitoring"]
+ABP["AudioBufferProcessor<br/>Memory-Optimized"]
+ASM["AudioSessionManager<br/>Comprehensive Error Handling"]
+LOG["Logger<br/>Centralized Logging"]
 end
-subgraph "Speech"
-SRS["SpeechRecognitionService"]
-TM["TranscriptManager"]
+subgraph "Speech Processing"
+SRS["SpeechRecognitionService<br/>Seamless Restarts"]
+TM["TranscriptManager<br/>Enhanced Segments"]
 end
 subgraph "Broadcast Extension"
-SH["SampleHandler"]
+SH["SampleHandler<br/>Improved Error Handling"]
 end
-subgraph "App"
-AS["AppState"]
-E["Enums.swift"]
-C["Constants.swift"]
+subgraph "App State Management"
+AS["AppState<br/>Enhanced Error Tracking"]
+E["Enums.swift<br/>Audio Quality Tiers"]
+C["Constants.swift<br/>Runtime Configuration"]
 end
 ACS --> ABP
 ABP --> SRS
 SRS --> TM
 ASM --> ACS
 SH --> AS
-AS --> E
-AS --> C
+AS --> LOG
+E --> AS
+C --> ACS
 ```
 
 **Diagram sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [SampleHandler.swift:1-84](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L84)
+- [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
 - [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
-- [Enums.swift:1-48](file://FactShield/FactShield/Models/Enums.swift#L1-L48)
-- [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
-
-**Section sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [SampleHandler.swift:1-84](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L84)
-- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
+- [Logger.swift:1-18](file://FactShield/FactShield/Utilities/Logger.swift#L1-L18)
 - [Enums.swift:1-48](file://FactShield/FactShield/Models/Enums.swift#L1-L48)
 - [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
 
 ## Core Components
-- AudioCaptureService: Installs a tap on the AVAudioEngine input node to receive PCM buffers at a fixed buffer size and forwards them to subscribers on a dedicated queue.
-- AudioBufferProcessor: Accumulates recent buffers up to a duration limit, trims older buffers, and feeds them to the speech recognition service.
-- AudioSessionManager: Configures the AVAudioSession for capture with voice chat mode (enabling AEC) and allows mixing with others.
-- SpeechRecognitionService: Manages SFSpeech recognition requests, partial and final results, on-device preference, and automatic restart on errors.
-- TranscriptManager: Maintains a rolling set of transcript segments with timestamps and provides recent and full transcripts.
-- AppState: Tracks global state including permissions and errors.
-- Enums and Constants: Define audio quality tiers and default runtime constants.
+The enhanced audio processing system now includes:
+
+- **AudioCaptureService**: Enhanced with automatic buffer monitoring, improved error logging, and larger buffer sizes for reliable delivery
+- **AudioBufferProcessor**: Memory-optimized with configurable duration limits and efficient trimming algorithms
+- **AudioSessionManager**: Comprehensive error handling with permission management and detailed debugging
+- **SpeechRecognitionService**: Seamless restart mechanisms with buffer preservation and enhanced error recovery
+- **TranscriptManager**: Enhanced segment management with timestamp-based filtering and memory optimization
+- **AppState**: Improved error tracking with structured error reporting
+- **Logger**: Centralized logging infrastructure with categorized subsystems
+- **Enums and Constants**: Enhanced configuration with quality tiers and runtime parameters
 
 **Section sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
 - [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
+- [Logger.swift:1-18](file://FactShield/FactShield/Utilities/Logger.swift#L1-L18)
 - [Enums.swift:1-48](file://FactShield/FactShield/Models/Enums.swift#L1-L48)
 - [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
 
 ## Architecture Overview
-The audio pipeline integrates capture, buffering, and speech recognition with robust error handling and session management.
+The enhanced audio pipeline provides robust error handling, comprehensive debugging, and optimized performance:
 
 ```mermaid
 sequenceDiagram
@@ -122,85 +125,91 @@ participant Capture as "AudioCaptureService"
 participant Buffer as "AudioBufferProcessor"
 participant Speech as "SpeechRecognitionService"
 participant Transcripts as "TranscriptManager"
+participant Logger as "Logger System"
 App->>Session : configureForCapture()
-Session-->>App : session active (AEC, mixWithOthers)
+Session->>Logger : log permission checks
+Session-->>App : session active (with error handling)
 App->>Capture : startListening()
+Capture->>Logger : monitor buffer flow
 Capture-->>App : onAudioBuffer callback
 App->>Buffer : processBuffer(AVAudioPCMBuffer)
-Buffer->>Speech : append(buffer)
+Buffer->>Speech : processAudioBuffer(buffer)
+Speech->>Logger : log recognition events
 Speech-->>Transcripts : update partial/final
 App->>Capture : stopListening()
+Capture->>Logger : log buffer statistics
 Capture-->>App : engine stopped
 App->>Session : deactivate()
+Session->>Logger : log deactivation
 Session-->>App : session inactive
 ```
 
 **Diagram sources**
-- [AudioSessionManager.swift:8-17](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L8-L17)
-- [AudioCaptureService.swift:19-40](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L19-L40)
+- [AudioSessionManager.swift:27-83](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L27-L83)
+- [AudioCaptureService.swift:21-77](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L21-L77)
 - [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
-- [SpeechRecognitionService.swift:41-84](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L41-L84)
+- [SpeechRecognitionService.swift:48-114](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L48-L114)
 - [TranscriptManager.swift:26-41](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L26-L41)
+- [Logger.swift:4-17](file://FactShield/FactShield/Utilities/Logger.swift#L4-L17)
 
 ## Detailed Component Analysis
 
-### AudioCaptureService
-Responsibilities:
-- Configure and start AVAudioEngine input node tap
-- Deliver PCM buffers to subscribers on a user interactive queue
-- Manage lifecycle with safe start/stop and logging
+### Enhanced AudioCaptureService
+**Updated** Improved with comprehensive buffer monitoring, enhanced error handling, and optimized buffer sizes.
 
-Key behaviors:
-- Uses the input node’s output format for the tap to avoid unnecessary conversions
-- Buffer size is fixed at 1024 frames
-- Subscribers receive buffers asynchronously on a dedicated queue
-- On start failure, logs an error and remains inactive
-
-```mermaid
-classDiagram
-class AudioCaptureService {
-+Bool isListening
-+AVAudioPCMBuffer? currentBuffer
-+onAudioBuffer : ((AVAudioPCMBuffer) -> Void)?
-+startListening()
-+stopListening()
-}
-class AVAudioEngine {
-+inputNode
-+prepare()
-+start()
-+stop()
-}
-AudioCaptureService --> AVAudioEngine : "owns and controls"
-```
-
-**Diagram sources**
-- [AudioCaptureService.swift:5-50](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L5-L50)
-
-**Section sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-
-### AudioBufferProcessor
-Responsibilities:
-- Maintain a rolling window of recent buffers
-- Trim old buffers based on duration and count thresholds
-- Forward buffers to the speech recognition service
-
-Processing logic:
-- Accumulates buffers and computes total duration
-- Trims to keep under a maximum duration threshold
-- Limits array size to prevent unbounded growth
-- Calls into the speech recognition service for continuous processing
+Key enhancements:
+- **Automatic Buffer Monitoring**: 1-second monitoring task detects zero-buffer scenarios with detailed debugging information
+- **Enhanced Error Logging**: Comprehensive logging of audio session state, input routes, and engine status
+- **Optimized Buffer Size**: Increased from 1024 to 4096 frames for more reliable delivery
+- **Improved Format Validation**: Pre-start validation of input format with detailed error reporting
+- **Structured Buffer Counting**: Track and report total buffers processed for debugging
 
 ```mermaid
 flowchart TD
-Start(["processBuffer(buffer)"]) --> Append["Append buffer to accumulatedBuffers"]
+Start(["startListening()"]) --> Validate["Validate input format"]
+Validate --> Prepare["Prepare AVAudioEngine"]
+Prepare --> InstallTap["Install tap with 4096 frame buffer"]
+InstallTap --> StartEngine["Start audio engine"]
+StartEngine --> Monitor["Start 1-second monitoring task"]
+Monitor --> ZeroCheck{"Buffer count > 0?"}
+ZeroCheck --> |Yes| Success["Log success metrics"]
+ZeroCheck --> |No| Debug["Log detailed debug information"]
+Debug --> SessionState["Log session state, route, engine status"]
+Success --> Active["isListening = true"]
+SessionState --> Active
+```
+
+**Diagram sources**
+- [AudioCaptureService.swift:21-77](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L21-L77)
+
+**Section sources**
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
+
+### Enhanced AudioBufferProcessor
+**Updated** Memory-optimized with configurable duration limits and efficient trimming algorithms.
+
+Key improvements:
+- **Configurable Duration Limits**: 30-second maximum accumulation duration
+- **Efficient Memory Management**: Automatic trimming when exceeding 100 buffers or duration limits
+- **Optimized Trimming Algorithm**: Smart trimming that preserves recent audio while removing older data
+- **Thread-Safe Processing**: Queue-based processing with proper synchronization
+
+```mermaid
+flowchart TD
+Process(["processBuffer(buffer)"]) --> Append["Append to accumulatedBuffers"]
 Append --> Trim["trimOldBuffers()"]
-Trim --> DurationCheck{"Total duration <= max?"}
-DurationCheck --> |Yes| Feed["Feed buffer to SpeechRecognitionService"]
-DurationCheck --> |No| RemoveOld["Remove oldest buffers until within limits"]
-RemoveOld --> Feed
-Feed --> End(["Done"])
+Trim --> CalcDuration["Calculate total duration"]
+CalcDuration --> CheckLimit{"Duration <= 30s AND < 100 buffers?"}
+CheckLimit --> |Yes| Feed["Feed to SpeechRecognitionService"]
+CheckLimit --> |No| TrimLogic["Trim algorithm"]
+TrimLogic --> DurationCheck{"Duration > 30s?"}
+DurationCheck --> |Yes| RemoveOld["Remove oldest buffers"]
+DurationCheck --> |No| SizeCheck{"Count > 100?"}
+RemoveOld --> SizeCheck
+SizeCheck --> |Yes| KeepRecent["Keep last 50 buffers"]
+SizeCheck --> |No| Feed
+KeepRecent --> Feed
+Feed --> Done(["Complete"])
 ```
 
 **Diagram sources**
@@ -209,179 +218,281 @@ Feed --> End(["Done"])
 **Section sources**
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
 
-### AudioSessionManager
-Responsibilities:
-- Configure the audio session for capture
-- Enable AEC via voice chat mode
-- Allow mixing with other audio and Bluetooth A2DP
-- Deactivate session cleanly
+### Enhanced AudioSessionManager
+**Updated** Comprehensive error handling with permission management and detailed debugging capabilities.
+
+Key enhancements:
+- **Structured Error Types**: Dedicated `AudioSessionError` enum with specific error cases
+- **Permission Management**: Complete microphone permission handling with user prompts
+- **Comprehensive Logging**: Detailed session state logging with input port information
+- **Enhanced Activation**: Explicit session activation with notification options
+- **Post-Activation Delay**: 0.1-second delay to allow iOS audio routing completion
 
 ```mermaid
 classDiagram
 class AudioSessionManager {
-+configureForCapture() throws
++configureForCapture() async throws
 +deactivate() throws
 }
+class AudioSessionError {
+<<enumeration>>
++microphonePermissionDenied
++categoryConfigurationFailed(Error)
++activationFailed(Error)
++description : String
+}
 class AVAudioSession {
++recordPermission
 +setCategory(mode, options)
 +setActive(options)
++currentRoute
 }
-AudioSessionManager --> AVAudioSession : "configures"
+AudioSessionManager --> AudioSessionError : "throws"
+AudioSessionManager --> AVAudioSession : "manages"
 ```
 
 **Diagram sources**
-- [AudioSessionManager.swift:4-22](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L4-L22)
+- [AudioSessionManager.swift:4-83](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L4-L83)
 
 **Section sources**
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
 
-### SpeechRecognitionService
-Responsibilities:
-- Initialize and authorize speech recognition
-- Manage SFSpeechAudioBufferRecognitionRequest
-- Prefer on-device recognition when available
-- Handle partial and final results, errors, and restarts
+### Enhanced SpeechRecognitionService
+**Updated** Seamless restart mechanisms with buffer preservation and enhanced error recovery.
 
-Behavior highlights:
-- Cancels previous tasks before starting a new recognition
-- Enables partial results and punctuation
-- Restarts recognition after transient errors with a small delay
-- Exposes methods to stop recognition and retrieve final/full transcripts
+Key improvements:
+- **Seamless Restart Mechanisms**: No delay restarts to prevent audio loss
+- **Buffer Preservation**: Pending buffer management during recognition restarts
+- **Enhanced Error Handling**: Specific handling for "No speech detected" errors (1110)
+- **Optimized Recognition Mode**: Dictation mode for better silence tolerance
+- **Thread-Safe Operations**: Queue-based processing for thread safety
 
 ```mermaid
 sequenceDiagram
 participant Client as "Client"
 participant SRS as "SpeechRecognitionService"
-participant SFR as "SFSpeechRecognizer"
-participant Req as "SFSpeechAudioBufferRecognitionRequest"
+participant Queue as "Recognition Queue"
+participant Request as "SFSpeechAudioBufferRecognitionRequest"
 Client->>SRS : startRecognition()
-SRS->>SFR : create request (partial results, punctuation)
-SRS->>Req : set requiresOnDeviceRecognition if supported
-SRS->>SFR : recognitionTask(with : request)
-SFR-->>SRS : result callbacks (partial/final)
-SRS-->>Client : update currentTranscript
-SRS-->>Client : getFullTranscript()/getRecentTranscript()
-Client->>SRS : stopRecognition()
-SRS-->>Client : final transcript string
+SRS->>Queue : _startRecognitionOnQueue()
+Queue->>SRS : cancel existing task
+SRS->>Request : create new request (partial, punctuation, dictation)
+SRS->>Request : set requiresOnDeviceRecognition (optional)
+SRS->>SRS : flush pending buffers
+SRS->>Request : append pending buffers
+SRS->>SRS : start recognition task
+SRS-->>Client : recognition callbacks
+Note over SRS : Error handling
+SRS->>SRS : detect error 1110 (no speech)
+SRS->>SRS : restartRecognition() (no delay)
+SRS->>Queue : restart on queue
 ```
 
 **Diagram sources**
-- [SpeechRecognitionService.swift:41-101](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L41-L101)
+- [SpeechRecognitionService.swift:48-167](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L48-L167)
 
 **Section sources**
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 
-### TranscriptManager
-Responsibilities:
-- Maintain transcript segments with timestamps
-- Provide recent transcript excerpts and full transcript
-- Trim old segments to bound memory usage
+### Enhanced TranscriptManager
+**Updated** Timestamp-based segment management with enhanced filtering and memory optimization.
+
+Key improvements:
+- **Timestamp-Based Filtering**: Time-based transcript segment filtering
+- **Memory Optimization**: Automatic trimming of segments older than 5 minutes
+- **Enhanced Segment Management**: Structured transcript segment handling
+- **Flexible Access Patterns**: Both full and recent transcript retrieval
 
 **Section sources**
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
 
-### Broadcast Extension (System Audio Capture)
-The Broadcast Upload Extension captures system audio during screen recordings and writes raw PCM data to a shared container for later processing by the main app.
+### Enhanced Broadcast Extension
+**Updated** Improved error handling and system audio capture capabilities.
 
-Highlights:
-- Receives audioApp and audioMic sample buffers
-- Extracts PCM data from CMSampleBuffer
-- Writes to a shared “broadcast_audio.raw” file in the app group container
-
-**Section sources**
-- [SampleHandler.swift:36-84](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L36-L84)
-- [FactShield-iOS-BuildInstructions.md:1941-2029](file://FactShield-iOS-BuildInstructions.md#L1941-L2029)
-
-## Dependency Analysis
-- AudioCaptureService depends on AVAudioEngine and dispatch queues for thread-safe buffer delivery
-- AudioBufferProcessor depends on SpeechRecognitionService for transcription
-- SpeechRecognitionService depends on SFSpeechRecognizer and manages its own lifecycle
-- AudioSessionManager coordinates session configuration for capture scenarios
-- AppState tracks permissions and errors surfaced to the UI
-- Enums and Constants define quality and runtime configuration
-
-```mermaid
-graph LR
-ASM["AudioSessionManager"] --> ACS["AudioCaptureService"]
-ACS --> ABP["AudioBufferProcessor"]
-ABP --> SRS["SpeechRecognitionService"]
-SRS --> TM["TranscriptManager"]
-AS["AppState"] --> ACS
-AS --> SRS
-E["Enums.swift"] --> AS
-C["Constants.swift"] --> ACS
-C --> ABP
-```
-
-**Diagram sources**
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
-- [Enums.swift:1-48](file://FactShield/FactShield/Models/Enums.swift#L1-L48)
-- [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
+Key enhancements:
+- **Robust Error Handling**: Better validation of sample buffers and data pointers
+- **Enhanced File Writing**: Improved file handling with proper existence checking
+- **Centralized App Group Management**: Consistent app group identifier usage
+- **Structured Logging**: Comprehensive logging for broadcast lifecycle events
 
 **Section sources**
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
-- [Enums.swift:1-48](file://FactShield/FactShield/Models/Enums.swift#L1-L48)
-- [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
+- [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
 
-## Performance Considerations
-- Buffer size: Fixed at 1024 frames for consistent processing cadence
-- Latency: Tap-based capture introduces minimal latency; voice chat mode enables AEC without extra CPU overhead
-- Throughput: Buffers are forwarded asynchronously to avoid blocking the audio thread
-- Memory: Rolling buffer trimming prevents unbounded growth; transcript segments are trimmed to a time window
-- Quality: On-device recognition reduces latency and privacy risk; speech quality can be tuned via audio quality enums
+## Enhanced Error Handling and Debugging
+**New Section** The enhanced system provides comprehensive error handling and debugging capabilities.
 
-[No sources needed since this section provides general guidance]
+### Centralized Logging Infrastructure
+The system now features a centralized logging approach with structured categories:
+
+- **Audio Subsystem**: Dedicated logging for capture, buffer processing, and session management
+- **Speech Recognition**: Comprehensive logging for recognition events and errors
+- **Broadcast Extension**: Detailed logging for system audio capture
+- **Structured Categories**: Organized logging by functional area
+
+### Enhanced Error Types
+- **AudioSessionError**: Specific error handling for audio session issues
+- **FactShieldError**: Application-level error management
+- **Structured Error Messages**: Descriptive error messages with actionable information
+
+### Debugging Capabilities
+- **Buffer Flow Monitoring**: Automatic detection of audio flow issues
+- **Session State Logging**: Detailed audio session state information
+- **Performance Metrics**: Buffer count tracking and processing statistics
+- **Route Information**: Comprehensive audio input/output routing details
+
+**Section sources**
+- [Logger.swift:1-18](file://FactShield/FactShield/Utilities/Logger.swift#L1-L18)
+- [AudioSessionManager.swift:4-19](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L4-L19)
+- [AppState.swift:16-28](file://FactShield/FactShield/App/AppState.swift#L16-L28)
+- [AudioCaptureService.swift:59-76](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L59-L76)
+
+## Performance Optimizations
+**Updated** Enhanced performance through optimized buffer management, reduced latency, and improved resource utilization.
+
+### Buffer Optimization
+- **Larger Buffer Sizes**: 4096-frame buffers for more reliable delivery
+- **Memory-Efficient Trimming**: Smart buffer trimming to prevent unbounded growth
+- **Configurable Duration Limits**: 30-second maximum accumulation duration
+- **Thread-Safe Processing**: Queue-based processing to prevent race conditions
+
+### Recognition Optimization
+- **Seamless Restarts**: Immediate restarts without audio loss
+- **Buffer Preservation**: Pending buffer management during restarts
+- **Optimized Recognition Mode**: Dictation mode for better silence handling
+- **Reduced Latency**: Elimination of restart delays
+
+### Resource Management
+- **Automatic Cleanup**: Proper resource cleanup on stop and error conditions
+- **Memory Bounds**: Configurable limits to prevent memory exhaustion
+- **Efficient Logging**: Structured logging with minimal performance impact
+- **Optimized File I/O**: Efficient system audio file writing
 
 ## Troubleshooting Guide
-Common issues and strategies:
-- Audio session activation failures: Wrap configuration in a do-catch and surface errors via AppState
-- Permission denials: Check microphone and speech recognition permissions; prompt users accordingly
-- Interruptions: Restart speech recognition after transient errors; ensure session reconfiguration on interruption
-- Hardware conflicts: Use mixWithOthers to avoid pausing other audio; verify Bluetooth A2DP availability
+**Updated** Enhanced troubleshooting with comprehensive error handling and debugging information.
 
-Error types and handling:
-- Audio session errors and speech recognition availability/denial are represented by domain-specific errors
-- Speech recognition service automatically restarts on error with a brief delay
+### Common Issues and Solutions
+- **Audio Session Activation Failures**: Check microphone permissions and session configuration
+- **Zero Buffer Detection**: Monitor buffer flow with automatic warnings and detailed debugging
+- **Permission Denials**: Handle microphone and speech recognition permission prompts
+- **Recognition Errors**: Automatic restart handling for common errors like "No speech detected"
+- **System Audio Capture Issues**: Enhanced error handling for broadcast extension
+
+### Enhanced Error Types and Handling
+- **AudioSessionError**: Microphone permission denied, category configuration failed, activation failed
+- **FactShieldError**: Application-level error management with descriptive messages
+- **Structured Error Reporting**: Detailed error information for debugging
+
+### Debugging Strategies
+- **Buffer Flow Monitoring**: Use automatic monitoring to detect audio flow issues
+- **Session State Inspection**: Check detailed session state information
+- **Performance Metrics**: Monitor buffer counts and processing statistics
+- **Logging Analysis**: Use structured logs to identify issues systematically
 
 **Section sources**
-- [AppState.swift:16-28](file://FactShield/FactShield/App/AppState.swift#L16-L28)
-- [Enums.swift:25-47](file://FactShield/FactShield/Models/Enums.swift#L25-L47)
-- [SpeechRecognitionService.swift:28-39](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L28-L39)
-- [SpeechRecognitionService.swift:76-80](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L76-L80)
-- [SpeechRecognitionService.swift:103-114](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L103-L114)
+- [AudioSessionManager.swift:34-51](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L34-L51)
+- [AudioCaptureService.swift:65-75](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L65-L75)
+- [SpeechRecognitionService.swift:101-109](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L101-L109)
+- [AppState.swift:20-28](file://FactShield/FactShield/App/AppState.swift#L20-L28)
 
 ## Conclusion
-The audio processing subsystem provides a robust, real-time pipeline for capturing microphone audio, buffering PCM data, and feeding it into speech recognition with AEC-enabled sessions. The design emphasizes thread safety, memory bounds, and resilience against interruptions, enabling reliable fact-checking workflows.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The enhanced audio processing subsystem provides a robust, real-time pipeline with comprehensive error handling, debugging capabilities, and optimized performance. Key improvements include automatic buffer monitoring, structured error handling, seamless recognition restarts, and centralized logging infrastructure. These enhancements enable reliable fact-checking workflows with improved reliability and maintainability.
 
 ## Appendices
 
-### Audio Formats and Quality
-- Audio quality tiers define sample rates suitable for different quality targets
-- Default runtime constants specify buffer size and maximum recording duration
+### Enhanced Audio Formats and Quality
+**Updated** Enhanced configuration with quality tiers and runtime parameters.
+
+- **Audio Quality Tiers**: Low (16kHz), Medium (44.1kHz), High (48kHz) sample rates
+- **Default Runtime Constants**: 16kHz sample rate, 1024 frame buffer size, 5-minute maximum recording
+- **Enhanced Buffer Configuration**: 4096-frame buffers for improved reliability
+- **Memory Management**: Configurable duration and count limits for optimal performance
 
 **Section sources**
 - [Enums.swift:11-23](file://FactShield/FactShield/Models/Enums.swift#L11-L23)
-- [Constants.swift:14-17](file://FactShield/FactShield/Utilities/Constants.swift#L14-L17)
+- [Constants.swift:14-21](file://FactShield/FactShield/Utilities/Constants.swift#L14-L21)
+- [AudioCaptureService.swift:38-46](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L38-L46)
 
-### Practical Setup Examples
-- Configure audio session for capture with AEC and mixing
-- Start and stop audio capture
-- Integrate with speech recognition and retrieve transcripts
+### Enhanced Practical Setup Examples
+**Updated** Comprehensive setup examples with error handling and debugging.
+
+#### Enhanced Audio Session Configuration
+```swift
+// Configure audio session with comprehensive error handling
+do {
+    try await AudioSessionManager.shared.configureForCapture()
+    print("Audio session configured successfully")
+} catch AudioSessionError.microphonePermissionDenied {
+    print("Microphone permission required")
+    AppState.shared.presentError(.audioSessionFailed("Microphone permission denied"))
+} catch {
+    print("Audio session configuration failed: \(error)")
+    AppState.shared.presentError(.audioSessionFailed(error.localizedDescription))
+}
+```
+
+#### Enhanced Audio Capture Setup
+```swift
+// Start audio capture with monitoring
+AudioCaptureService.shared.onAudioBuffer = { buffer in
+    // Process audio buffer
+    AudioBufferProcessor.shared.processBuffer(buffer)
+}
+
+do {
+    try await AudioSessionManager.shared.configureForCapture()
+    AudioCaptureService.shared.startListening()
+} catch {
+    print("Failed to start audio capture: \(error)")
+}
+```
+
+#### Enhanced Speech Recognition Integration
+```swift
+// Enhanced speech recognition with error handling
+SpeechRecognitionService.shared.startRecognition()
+
+// Handle recognition callbacks
+SpeechRecognitionService.shared.$currentTranscript.sink { transcript in
+    print("Current transcript: \(transcript)")
+    
+    // Update UI or trigger fact-checking
+    if transcript.count > 100 {
+        // Trigger fact-checking workflow
+    }
+}.store(in: &cancellables)
+```
 
 **Section sources**
-- [AudioSessionManager.swift:8-17](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L8-L17)
-- [AudioCaptureService.swift:19-40](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L19-L40)
-- [SpeechRecognitionService.swift:41-84](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L41-L84)
-- [TranscriptManager.swift:14-24](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L14-L24)
+- [AudioSessionManager.swift:27-83](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L27-L83)
+- [AudioCaptureService.swift:21-77](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L21-L77)
+- [SpeechRecognitionService.swift:48-114](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L48-L114)
+
+### Enhanced System Audio Capture
+**Updated** Improved system audio capture with better error handling and configuration.
+
+#### Broadcast Extension Configuration
+```swift
+// Enhanced broadcast extension setup
+override func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
+    logger.info("Broadcast started with enhanced error handling")
+    
+    // Notify main app with error checking
+    if let defaults = UserDefaults(suiteName: appGroup) {
+        defaults.set(true, forKey: "isBroadcasting")
+        defaults.set(Date(), forKey: "broadcastStartedAt")
+    }
+}
+
+override func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBufferType: RPSampleBufferType) {
+    switch sampleBufferType {
+    case .audioApp, .audioMic:
+        processAudioSampleBuffer(sampleBuffer)
+    default:
+        break
+    }
+}
+```
+
+**Section sources**
+- [SampleHandler.swift:10-55](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L10-L55)
+- [SampleHandler.swift:57-83](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L57-L83)

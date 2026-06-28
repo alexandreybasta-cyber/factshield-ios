@@ -47,20 +47,13 @@ struct FactCheckSessionView: View {
                         Button("Stop") {
                             Task {
                                 await coordinator.stopSession()
-                                AudioCaptureService.shared.stopListening()
-                                SpeechRecognitionService.shared.stopRecognition()
-                                try? await AudioSessionManager.shared.deactivate()
                             }
                         }
                         .foregroundStyle(.red)
                     } else {
                         Button("Start") {
                             Task {
-                                try? await AudioSessionManager.shared.configureForCapture()
-                                AudioCaptureService.shared.startListening()
-                                SpeechRecognitionService.shared.startRecognition()
-                                try? await ActivityManager.shared.startLiveActivity()
-                                coordinator.startSession()
+                                await coordinator.startSession()
                             }
                         }
                     }
@@ -286,6 +279,19 @@ struct SourceRow: View {
     let source: Source
     
     var body: some View {
+        Group {
+            if let url = URL(string: source.url) {
+                Link(destination: url) {
+                    sourceContent
+                }
+                .buttonStyle(.plain)
+            } else {
+                sourceContent
+            }
+        }
+    }
+    
+    private var sourceContent: some View {
         HStack(alignment: .top, spacing: 8) {
             Circle()
                 .fill(credibilityColor(source.credibilityScore))
@@ -296,16 +302,28 @@ struct SourceRow: View {
                 HStack {
                     Text(source.name)
                         .font(.caption.bold())
+                        .foregroundStyle(.orange)
                     if let bias = source.biasRating {
                         Text("(\(bias))")
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                     }
+                    Spacer()
+                    Image(systemName: "arrow.up.right.square")
+                        .font(.caption2)
+                        .foregroundStyle(.orange.opacity(0.7))
                 }
                 Text(source.snippet)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
+                if URL(string: source.url) != nil {
+                    Text(source.url)
+                        .font(.caption2)
+                        .foregroundStyle(.orange.opacity(0.6))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                }
             }
         }
     }

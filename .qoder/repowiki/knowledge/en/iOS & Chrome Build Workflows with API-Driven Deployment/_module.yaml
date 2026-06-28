@@ -1,0 +1,15 @@
+schema_version: 1
+module_path: build_system
+title: iOS & Chrome Build Workflows with API-Driven Deployment
+scope: []
+source_files:
+    - FactShield/Package.swift
+    - FactShield/FactShield/Resources/Info.plist
+    - FactShield/FactShield/Resources/FactShield.entitlements
+    - FactShield/FactShield/BroadcastExtension/Info.plist
+    - FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements
+    - FactShield-ChromeExtension/manifest.json
+    - push-via-api.sh
+    - FactShield-iOS-BuildInstructions.md
+depends_on: []
+related_to: []

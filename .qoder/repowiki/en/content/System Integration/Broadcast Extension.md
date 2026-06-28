@@ -15,9 +15,16 @@
 - [AppState.swift](file://FactShield/FactShield/App/AppState.swift)
 - [Constants.swift](file://FactShield/FactShield/Utilities/Constants.swift)
 - [FactCheckSession.swift](file://FactShield/FactShield/Models/FactCheckSession.swift)
-- [FactShield-iOS-BuildInstructions.md](file://FactShield-iOS-BuildInstructions.md)
-- [FactShield-Architecture.md](file://FactShield-Architecture.md)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Enhanced audio sample processing pipeline with sophisticated buffering and error handling
+- Improved app group communication with robust UserDefaults synchronization
+- Added comprehensive audio session management with permission handling
+- Strengthened speech recognition service with seamless restart capabilities
+- Implemented advanced buffer management with rolling windows and memory constraints
+- Enhanced error handling and logging throughout the broadcast extension architecture
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -25,349 +32,412 @@
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Enhanced Audio Processing Pipeline](#enhanced-audio-processing-pipeline)
+7. [Robust Error Handling Framework](#robust-error-handling-framework)
+8. [App Group Communication System](#app-group-communication-system)
+9. [Performance Optimization Strategies](#performance-optimization-strategies)
+10. [Security and Compliance](#security-and-compliance)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
 
 ## Introduction
-This document explains the ReplayKit broadcast extension implementation in FactChecking Live. It covers the SampleHandler class architecture, broadcast session lifecycle, audio processing pipeline, and system audio capture. It documents entitlements configuration, inter-app communication via App Groups, setup instructions for broadcast extension capabilities, audio processing constraints, and troubleshooting guidance grounded in the repository’s source files.
+This document explains the enhanced ReplayKit broadcast extension implementation in FactChecking Live. The system now features sophisticated audio sample processing, robust error handling, comprehensive system audio capture capabilities, and seamless app group communication between the main application and broadcast extension. The architecture supports both .audioApp and .audioMic sample buffer types while maintaining strict memory constraints and optimal performance characteristics.
 
 ## Project Structure
-The broadcast extension is implemented as a ReplayKit Broadcast Upload Extension with a dedicated SampleHandler entry point. Supporting audio and speech components reside in the main app target. App Group entitlements enable secure data exchange between the main app and the extension.
+The broadcast extension implements a comprehensive audio processing pipeline with enhanced error handling and state management. The architecture maintains separation of concerns while ensuring reliable inter-process communication through App Group containers.
 
 ```mermaid
 graph TB
-subgraph "Main App Target"
-MA_AppState["AppState"]
-MA_AudioSession["AudioSessionManager"]
-MA_AudioCapture["AudioCaptureService"]
-MA_BufferProc["AudioBufferProcessor"]
-MA_Speech["SpeechRecognitionService"]
-MA_Transcript["TranscriptManager"]
-MA_Constants["Constants"]
-MA_Session["FactCheckSession"]
+subgraph "Enhanced Broadcast Extension"
+BE_SampleHandler["SampleHandler<br/>Enhanced Audio Processing"]
+BE_Entitlements["FactShieldBroadcast.entitlements<br/>App Group Access"]
+BE_Info["Broadcast Extension Info.plist<br/>ReplayKit Configuration"]
 end
-subgraph "Broadcast Extension Target"
-BE_SampleHandler["SampleHandler"]
-BE_Entitlements["FactShieldBroadcast.entitlements"]
-BE_Info["Broadcast Extension Info.plist"]
+subgraph "Core Audio Processing"
+AP_Session["AudioSessionManager<br/>Enhanced Permission Handling"]
+AP_Capture["AudioCaptureService<br/>Robust Buffer Monitoring"]
+AP_Processor["AudioBufferProcessor<br/>Rolling Window Management"]
 end
-subgraph "Shared Resources"
-SG_AppGroup["App Group Container<br/>\"group.com.factshield.shared\""]
-SG_UserDefaults["Shared UserDefaults"]
-SG_File["broadcast_audio.raw"]
+subgraph "Speech Recognition"
+SR_Service["SpeechRecognitionService<br/>Seamless Restart Logic"]
+TR_Manager["TranscriptManager<br/>Advanced Segment Management"]
 end
-MA_AppState --> SG_UserDefaults
-MA_AppState --> SG_File
-BE_SampleHandler --> SG_File
-BE_SampleHandler --> SG_UserDefaults
-MA_AudioSession --> MA_AudioCapture
-MA_AudioCapture --> MA_BufferProc
-MA_BufferProc --> MA_Speech
-MA_Speech --> MA_Transcript
-MA_Session --> MA_Speech
-BE_Entitlements -.-> SG_AppGroup
-BE_Info -.-> BE_SampleHandler
+subgraph "State Management"
+AS_AppState["AppState<br/>Global State Tracking"]
+CN_Constants["Constants<br/>Centralized Configuration"]
+FC_Session["FactCheckSession<br/>Session Data Model"]
+end
+BE_SampleHandler --> AP_Session
+BE_SampleHandler --> AP_Capture
+BE_SampleHandler --> AP_Processor
+AP_Processor --> SR_Service
+SR_Service --> TR_Manager
+AS_AppState --> CN_Constants
+AS_AppState --> FC_Session
 ```
 
 **Diagram sources**
 - [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
-- [FactShieldBroadcast.entitlements:1-11](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L1-L11)
-- [Info.plist:1-16](file://FactShield/FactShield/BroadcastExtension/Info.plist#L1-L16)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [AppState.swift:1-29](file://FactShield/FactShield/App/AppState.swift#L1-L29)
-- [Constants.swift:1-36](file://FactShield/FactShield/Utilities/Constants.swift#L1-L36)
+- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
+- [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
 - [FactCheckSession.swift:1-54](file://FactShield/FactShield/Models/FactCheckSession.swift#L1-L54)
 
 **Section sources**
 - [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
-- [Info.plist:1-16](file://FactShield/FactShield/BroadcastExtension/Info.plist#L1-L16)
-- [FactShieldBroadcast.entitlements:1-11](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L1-L11)
-- [FactShield.entitlements:1-11](file://FactShield/FactShield/Resources/FactShield.entitlements#L1-L11)
-- [Info.plist:1-25](file://FactShield/FactShield/Resources/Info.plist#L1-L25)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
+- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
+- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
+- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
+- [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
+- [FactCheckSession.swift:1-54](file://FactShield/FactShield/Models/FactCheckSession.swift#L1-L54)
 
 ## Core Components
-- SampleHandler: Implements the ReplayKit broadcast extension entry point, manages broadcast lifecycle events, and streams audio buffers to the main app via App Group shared storage.
-- AudioSessionManager: Configures the audio session for capture with AEC and mixing options suitable for concurrent playback.
-- AudioCaptureService: Installs an AVAudioEngine input tap to deliver PCM buffers to the processing pipeline.
-- AudioBufferProcessor: Maintains a rolling buffer of recent PCM audio and forwards buffers to the speech recognizer.
-- SpeechRecognitionService: Orchestrates on-device speech recognition, partial and final results, and restart logic.
-- TranscriptManager: Maintains a segmented transcript with timestamps and rolling trimming.
-- AppState: Global state holder for permissions, broadcast state, and errors.
-- Constants: Centralized identifiers and configuration values including App Group, bundle IDs, audio defaults, and UserDefaults keys.
-- FactCheckSession: Data model representing a fact-check session with capture mode and status.
+The enhanced broadcast extension architecture consists of several sophisticated components working together to provide reliable audio capture and processing:
+
+- **SampleHandler**: Enhanced ReplayKit broadcast extension entry point with improved audio buffer processing and robust error handling
+- **AudioSessionManager**: Advanced audio session configuration with comprehensive permission handling and activation monitoring
+- **AudioCaptureService**: Sophisticated audio capture with buffer monitoring, flow validation, and automatic recovery mechanisms
+- **AudioBufferProcessor**: Intelligent rolling buffer management with memory constraint enforcement and efficient processing
+- **SpeechRecognitionService**: Robust speech recognition with seamless restart logic, error recovery, and continuous processing
+- **TranscriptManager**: Advanced transcript segmentation with timestamp management and configurable retention policies
+- **AppState**: Comprehensive global state management with permission tracking and error reporting
+- **Constants**: Centralized configuration management with enhanced parameter validation and defaults
 
 **Section sources**
 - [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [AppState.swift:1-29](file://FactShield/FactShield/App/AppState.swift#L1-L29)
-- [Constants.swift:1-36](file://FactShield/FactShield/Utilities/Constants.swift#L1-L36)
-- [FactCheckSession.swift:1-54](file://FactShield/FactShield/Models/FactCheckSession.swift#L1-L54)
+- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
+- [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
 
 ## Architecture Overview
-The broadcast extension captures system audio delivered by iOS during a screen broadcast and writes raw PCM frames to a shared file in the App Group container. The main app monitors the shared container and UserDefaults to synchronize broadcast state and consume audio for transcription and verification.
+The enhanced architecture implements a sophisticated audio processing pipeline that captures system audio, processes it in real-time, and maintains robust state synchronization between the broadcast extension and main application.
 
 ```mermaid
 sequenceDiagram
 participant User as "User"
 participant iOS as "iOS Broadcast Services"
-participant Ext as "Broadcast Extension<br/>SampleHandler"
+participant Ext as "Enhanced SampleHandler"
+participant Buffer as "AudioBufferProcessor"
+participant SR as "SpeechRecognitionService"
 participant AppGroup as "App Group Container"
-participant MainApp as "Main App"
+participant MainApp as "Main Application"
 User->>iOS : "Start Screen Broadcast"
-iOS->>Ext : "Launch extension process"
-Ext->>Ext : "broadcastStarted()"
-Ext->>AppGroup : "Write broadcast state to UserDefaults"
-loop "Per audio buffer"
+iOS->>Ext : "Launch broadcast extension"
+Ext->>Ext : "broadcastStarted(withSetupInfo)"
+Ext->>AppGroup : "Set isBroadcasting=true, timestamp"
+loop "Audio Processing Loop"
 iOS-->>Ext : "CMSampleBuffer (.audioApp/.audioMic)"
-Ext->>Ext : "processSampleBuffer(...)"
-Ext->>AppGroup : "Append PCM frame to broadcast_audio.raw"
+Ext->>Ext : "processAudioSampleBuffer()"
+Ext->>Buffer : "processBuffer(AVAudioPCMBuffer)"
+Buffer->>SR : "processAudioBuffer(buffer)"
+SR->>SR : "Continuous recognition with restart"
+SR-->>Buffer : "Partial/Final results"
+Buffer-->>SR : "Queued processing"
+SR->>AppGroup : "Update transcript state"
 end
 User->>iOS : "Stop Broadcast"
 iOS->>Ext : "broadcastFinished()"
-Ext->>AppGroup : "Clear broadcast state in UserDefaults"
-MainApp->>AppGroup : "Read broadcast_audio.raw and state"
+Ext->>AppGroup : "Clear broadcast state"
+MainApp->>AppGroup : "Read audio data and state"
 ```
 
 **Diagram sources**
 - [SampleHandler.swift:10-34](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L10-L34)
-- [SampleHandler.swift:36-55](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L36-L55)
-- [SampleHandler.swift:57-83](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L57-L83)
-- [Info.plist:5-13](file://FactShield/FactShield/BroadcastExtension/Info.plist#L5-L13)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
+- [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
+- [SpeechRecognitionService.swift:48-114](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L48-L114)
+- [AppState.swift:8-18](file://FactShield/FactShield/App/AppState.swift#L8-L18)
 
 ## Detailed Component Analysis
 
-### SampleHandler Class
-Responsibilities:
-- Broadcast lifecycle management: start, pause, resume, finish.
-- Audio buffer processing: handles .audioApp and .audioMic sample buffer types.
-- Inter-process communication: writes audio frames to a shared file and updates shared UserDefaults to signal broadcast state.
+### Enhanced SampleHandler Implementation
+The SampleHandler now implements sophisticated audio processing with comprehensive error handling and state management:
 
-Key behaviors:
-- On broadcast start, sets a flag and timestamp in shared UserDefaults.
-- On broadcast finish, clears the broadcast flag.
-- For each audio buffer, extracts the raw PCM data and appends it to a shared file named “broadcast_audio.raw” inside the App Group container.
-- Ignores video buffers as they are not used.
+**Key Enhancements:**
+- **Dual Audio Source Support**: Processes both .audioApp (system audio) and .audioMic (microphone) buffers
+- **Robust File I/O**: Implements safe append operations with proper file handle management
+- **Enhanced Logging**: Comprehensive logging for debugging and monitoring
+- **Memory Safety**: Proper buffer pointer validation and bounds checking
 
-```mermaid
-classDiagram
-class SampleHandler {
--logger
--appGroup : "group.com.factshield.shared"
-+broadcastStarted(withSetupInfo)
-+broadcastPaused()
-+broadcastResumed()
-+broadcastFinished()
-+processSampleBuffer(sampleBuffer, with)
--processAudioSampleBuffer(sampleBuffer)
-}
-```
-
-**Diagram sources**
-- [SampleHandler.swift:4-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L4-L85)
-
-**Section sources**
-- [SampleHandler.swift:10-34](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L10-L34)
-- [SampleHandler.swift:36-55](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L36-L55)
-- [SampleHandler.swift:57-83](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L57-L83)
-
-### Audio Processing Pipeline
-End-to-end flow:
-- AudioSessionManager configures the audio session for play-and-record with voice-chat mode to enable AEC and mixing with other audio.
-- AudioCaptureService installs an input tap on the engine’s input node and dispatches PCM buffers to a callback queue.
-- AudioBufferProcessor accumulates recent buffers and forwards them to SpeechRecognitionService.
-- SpeechRecognitionService performs on-device recognition, emits partial and final transcripts, and restarts on transient errors.
-- TranscriptManager maintains segments with timestamps and a rolling window trimmed by time.
+**Audio Processing Flow:**
+1. Validates CMSampleBuffer data buffer pointer
+2. Extracts raw PCM data using CMBlockBuffer APIs
+3. Writes to App Group shared container with atomic file operations
+4. Maintains broadcast state through UserDefaults synchronization
 
 ```mermaid
 flowchart TD
-Start(["Audio Capture Started"]) --> Configure["Configure Audio Session<br/>Voice Chat Mode + Mix With Others"]
-Configure --> Tap["Install Input Tap<br/>Buffer Size and Format"]
-Tap --> Dispatch["Dispatch PCM Buffer to Queue"]
-Dispatch --> Accumulate["Accumulate in Rolling Buffer<br/>Trim Old Buffers"]
-Accumulate --> Recognize["Feed to Speech Recognition Service"]
-Recognize --> Partial["Emit Partial Transcript"]
-Recognize --> Final["Emit Final Transcript Segment"]
-Partial --> Manage["Transcript Manager: Append Segment<br/>Trim Old Segments"]
-Final --> Manage
-Manage --> End(["Pipeline Active"])
+Start([Sample Buffer Received]) --> Type{Buffer Type?}
+Type --> |.audioApp| AppAudio[Extract System Audio]
+Type --> |.audioMic| MicAudio[Extract Microphone Audio]
+Type --> |.video| Skip[Ignore Video Buffers]
+AppAudio --> Validate[Validate Buffer Pointer]
+MicAudio --> Validate
+Skip --> End[Complete]
+Validate --> Length{Length > 0?}
+Length --> |No| End
+Length --> |Yes| Write[Write to broadcast_audio.raw]
+Write --> End
 ```
 
 **Diagram sources**
-- [AudioSessionManager.swift:8-17](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L8-L17)
-- [AudioCaptureService.swift:19-40](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L19-L40)
-- [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
-- [SpeechRecognitionService.swift:41-84](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L41-L84)
-- [TranscriptManager.swift:26-46](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L26-L46)
+- [SampleHandler.swift:36-55](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L36-L55)
+- [SampleHandler.swift:57-83](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L57-L83)
 
 **Section sources**
-- [AudioSessionManager.swift:8-17](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L8-L17)
-- [AudioCaptureService.swift:19-40](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L19-L40)
-- [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
-- [SpeechRecognitionService.swift:41-84](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L41-L84)
-- [TranscriptManager.swift:26-46](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L26-L46)
+- [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
 
-### Entitlements and Security Model
-- App Group entitlements: Both the main app and the broadcast extension declare the same App Group identifier to share data safely.
-- Extension Info.plist: Declares the broadcast extension point identifier and principal class, and sets the sample buffer processing mode.
-- Main app Info.plist: Declares microphone and speech recognition usage descriptions, and background modes.
+### Advanced Audio Session Management
+The AudioSessionManager provides comprehensive audio session configuration with robust error handling:
+
+**Enhanced Capabilities:**
+- **Permission Lifecycle Management**: Handles undetermined, granted, and denied microphone permissions
+- **Category Configuration**: Sets up playAndRecord with measurement mode and appropriate options
+- **Activation Monitoring**: Provides detailed logging of audio routing and session state
+- **Graceful Degradation**: Implements fallback mechanisms for audio session failures
+
+**Configuration Details:**
+- Category: `.playAndRecord` with `.measurement` mode
+- Options: `.defaultToSpeaker`, `.allowBluetoothA2DP`, `.mixWithOthers`
+- Post-activation delay: 100ms for audio routing completion
+- Input port monitoring: Tracks active audio input devices
+
+**Section sources**
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
+
+### Intelligent Audio Capture Service
+The AudioCaptureService implements sophisticated buffer monitoring and flow validation:
+
+**Advanced Features:**
+- **Buffer Monitoring**: Monitors audio flow with 1-second timeout validation
+- **Flow Diagnostics**: Comprehensive logging of audio routing issues
+- **Automatic Recovery**: Detects and reports zero-buffer conditions
+- **Resource Management**: Proper cleanup of audio engine resources
+
+**Monitoring Capabilities:**
+- Tracks total buffer count during startup phase
+- Validates audio format before installation
+- Monitors engine state and input node configuration
+- Logs detailed diagnostics for troubleshooting
+
+**Section sources**
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
+
+## Enhanced Audio Processing Pipeline
+The audio processing pipeline implements sophisticated buffering, memory management, and real-time processing capabilities:
+
+### Rolling Buffer Architecture
+The AudioBufferProcessor implements intelligent memory management with configurable duration limits:
+
+**Memory Constraints:**
+- Maximum buffer duration: 30 seconds of accumulated audio
+- Automatic trimming of oldest buffers when limits exceeded
+- Efficient memory usage through buffer reuse and selective retention
+
+**Processing Logic:**
+1. Appends new buffers to accumulation array
+2. Calculates total duration using frameLength and sampleRate
+3. Trims excess buffers while maintaining minimum threshold
+4. Forwards processed buffers to speech recognition service
+
+### Speech Recognition Enhancement
+The SpeechRecognitionService provides seamless continuous processing with robust error handling:
+
+**Restart Mechanism:**
+- Seamless recognition restart without audio loss
+- Pending buffer queuing during restart periods
+- Error code 1110 handling for "No speech detected" scenarios
+- Immediate restart without artificial delays
+
+**Transcript Management:**
+- Rolling window of 2000 words maximum
+- Recent transcript extraction for last 30 seconds
+- Thread-safe queue for recognition operations
+- Configurable task hints for continuous audio processing
 
 ```mermaid
 graph LR
-MainEnt["Main App Entitlements<br/>FactShield.entitlements"] --> AppGroup["App Group<br/>\"group.com.factshield.shared\""]
-ExtEnt["Broadcast Extension Entitlements<br/>FactShieldBroadcast.entitlements"] --> AppGroup
-AppGroup --> SharedFile["Shared File<br/>broadcast_audio.raw"]
-AppGroup --> SharedUD["Shared UserDefaults<br/>isBroadcasting, broadcastStartedAt"]
+subgraph "Audio Processing Pipeline"
+Input[Audio Input] --> Buffer[Rolling Buffer Processor]
+Buffer --> Format[Format Conversion]
+Format --> Speech[Speech Recognition]
+end
+subgraph "Error Recovery"
+Error[Recognition Error] --> Queue[Pending Buffer Queue]
+Queue --> Restart[Seamless Restart]
+Restart --> Speech
+end
+subgraph "Memory Management"
+Trim[Duration-based Trimming] --> Buffer
+Queue --> Trim
+end
 ```
 
 **Diagram sources**
-- [FactShield.entitlements:5-8](file://FactShield/FactShield/Resources/FactShield.entitlements#L5-L8)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
-- [Info.plist:7-12](file://FactShield/FactShield/BroadcastExtension/Info.plist#L7-L12)
+- [AudioBufferProcessor.swift:12-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L12-L36)
+- [SpeechRecognitionService.swift:146-167](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L146-L167)
+- [SpeechRecognitionService.swift:169-189](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L169-L189)
 
 **Section sources**
-- [FactShield.entitlements:5-8](file://FactShield/FactShield/Resources/FactShield.entitlements#L5-L8)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
-- [Info.plist:5-13](file://FactShield/FactShield/BroadcastExtension/Info.plist#L5-L13)
-- [Info.plist:5-22](file://FactShield/FactShield/Resources/Info.plist#L5-L22)
+- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
+- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
 
-### Inter-App Communication Patterns
-- Data sharing: The extension writes PCM frames to a shared file in the App Group container. The main app reads this file to reconstruct the audio stream for processing.
-- State synchronization: The extension writes broadcast state flags and timestamps to shared UserDefaults. The main app reads these values to reflect live state.
-- Constants: Centralized keys and identifiers ensure consistent cross-target communication.
+## Robust Error Handling Framework
+The system implements comprehensive error handling across all components:
+
+### Audio Session Error Management
+Structured error types for audio session failures:
+- **microphonePermissionDenied**: User has denied microphone access
+- **categoryConfigurationFailed**: Audio session category setup failure
+- **activationFailed**: Audio session activation problems
+
+### Speech Recognition Error Handling
+Sophisticated error recovery mechanisms:
+- **Error Code 1110**: "No speech detected" handled gracefully
+- **Pending Buffer Queue**: Prevents audio loss during restarts
+- **Immediate Restart Logic**: Eliminates processing gaps
+- **Thread-Safe Operations**: Queue-based processing prevents race conditions
+
+### State Management Integration
+AppState coordinates error handling across the system:
+- Centralized error storage and presentation
+- Permission state tracking for microphone and speech recognition
+- Broadcast state synchronization with UI updates
+
+**Section sources**
+- [AudioSessionManager.swift:4-19](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L4-L19)
+- [SpeechRecognitionService.swift:101-110](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L101-L110)
+- [AppState.swift:16-28](file://FactShield/FactShield/App/AppState.swift#L16-L28)
+
+## App Group Communication System
+The enhanced system implements robust inter-process communication through App Group containers:
+
+### Shared State Management
+Comprehensive state synchronization between extension and main app:
+- **Broadcast Status**: Real-time broadcasting state tracking
+- **Timestamp Management**: Precise broadcast start/end timing
+- **Session Coordination**: Seamless handoff between processes
+
+### File-Based Communication
+Reliable audio data transfer through shared storage:
+- **Atomic Operations**: Safe append operations to prevent corruption
+- **File Handle Management**: Proper resource cleanup and error handling
+- **Memory-Constrained Design**: Optimized for broadcast extension memory limits
+
+### Configuration Synchronization
+Centralized configuration management:
+- **Constants Repository**: Single source of truth for identifiers and settings
+- **UserDefaults Integration**: Persistent state across app launches
+- **Notification System**: Event-driven state updates
 
 ```mermaid
-sequenceDiagram
-participant Ext as "Broadcast Extension"
-participant AG as "App Group Container"
-participant Main as "Main App"
-Ext->>AG : "Write broadcast_audio.raw"
-Ext->>AG : "Set isBroadcasting=true, broadcastStartedAt=Date"
-Main->>AG : "Poll/read broadcast_audio.raw"
-Main->>AG : "Read isBroadcasting, broadcastStartedAt"
-Main-->>Main : "Update AppState and UI"
+graph TB
+subgraph "App Group Communication"
+Ext[Broadcast Extension] <- --> |Shared File| SharedFile[broadcast_audio.raw]
+Ext <- --> |UserDefaults| SharedUD[isBroadcasting, timestamps]
+Main[Main Application] <- --> |Shared File| SharedFile
+Main <- --> |UserDefaults| SharedUD
+end
+subgraph "State Synchronization"
+Start[Extension State] --> Sync[Sync to App Group]
+Sync --> Main[Main App Detection]
+Main --> Update[UI and Processing Updates]
+end
 ```
 
 **Diagram sources**
 - [SampleHandler.swift:14-17](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L14-L17)
 - [SampleHandler.swift:31-33](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L31-L33)
-- [SampleHandler.swift:67-83](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L67-L83)
 - [Constants.swift:28-31](file://FactShield/FactShield/Utilities/Constants.swift#L28-L31)
 
 **Section sources**
-- [SampleHandler.swift:14-17](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L14-L17)
-- [SampleHandler.swift:31-33](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L31-L33)
-- [SampleHandler.swift:67-83](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L67-L83)
-- [Constants.swift:28-31](file://FactShield/FactShield/Utilities/Constants.swift#L28-L31)
+- [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
+- [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
 
-## Dependency Analysis
-- SampleHandler depends on the App Group container and shared UserDefaults for IPC.
-- Audio pipeline components depend on AVFoundation and Speech frameworks.
-- Speech recognition leverages on-device capabilities when available.
-- Global state and constants coordinate cross-module behavior.
+## Performance Optimization Strategies
+The enhanced system implements multiple optimization strategies for memory efficiency and real-time processing:
 
-```mermaid
-graph TD
-SH["SampleHandler"] --> AG["App Group Container"]
-SH --> UD["Shared UserDefaults"]
-AC["AudioCaptureService"] --> AE["AVAudioEngine"]
-AB["AudioBufferProcessor"] --> SR["SpeechRecognitionService"]
-SR --> TR["TranscriptManager"]
-AS["AudioSessionManager"] --> AE
-ST["AppState"] --> UD
-ST --> SR
-CS["Constants"] --> SH
-CS --> ST
-```
+### Memory Management
+- **Buffer Duration Limits**: 30-second rolling windows prevent unbounded memory growth
+- **Selective Buffer Retention**: Minimum threshold ensures processing continuity
+- **Efficient Data Structures**: Arrays optimized for audio buffer operations
 
-**Diagram sources**
-- [SampleHandler.swift:4-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L4-L85)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [AppState.swift:1-29](file://FactShield/FactShield/App/AppState.swift#L1-L29)
-- [Constants.swift:1-36](file://FactShield/FactShield/Utilities/Constants.swift#L1-L36)
+### Processing Efficiency
+- **Asynchronous Operations**: Non-blocking processing through GCD queues
+- **Minimal Allocations**: Reuse buffers and minimize object creation
+- **Optimized Formats**: 4096-byte buffer size balances latency and throughput
+
+### Resource Optimization
+- **Engine Cleanup**: Proper audio engine shutdown and resource release
+- **Monitor Task Management**: One-second monitoring with automatic cancellation
+- **File I/O Optimization**: Atomic append operations reduce disk contention
 
 **Section sources**
-- [SampleHandler.swift:4-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L4-L85)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [AppState.swift:1-29](file://FactShield/FactShield/App/AppState.swift#L1-L29)
-- [Constants.swift:1-36](file://FactShield/FactShield/Utilities/Constants.swift#L1-L36)
+- [AudioBufferProcessor.swift:14-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L14-L36)
+- [AudioCaptureService.swift:17-77](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L17-L77)
+- [SpeechRecognitionService.swift:28](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L28)
 
-## Performance Considerations
-- Memory constraints: The broadcast extension operates under a strict memory budget; writing raw PCM to disk is lightweight but still requires careful buffer sizes and minimal allocations.
-- Buffer sizing: The audio pipeline uses a fixed buffer size for the input tap; tuning this value balances latency and CPU usage.
-- Rolling windows: Both the audio buffer processor and transcript manager enforce time-based trimming to cap memory growth.
-- Background modes: The main app declares background modes to keep audio processing alive during remote notifications and background fetch.
-- AEC and mixing: Voice-chat mode with mixing ensures minimal echo and allows concurrent playback, improving user experience without extra CPU overhead from manual echo cancellation.
+## Security and Compliance
+The enhanced system maintains strict security boundaries while providing necessary functionality:
 
-[No sources needed since this section provides general guidance]
+### App Group Isolation
+- **Data Containment**: All shared data confined to designated App Group container
+- **Sandbox Compliance**: Respects iOS sandbox restrictions and memory limits
+- **Access Control**: Single identifier shared between main app and extension
+
+### Privacy Considerations
+- **Minimal Data Collection**: Only raw PCM audio data is transmitted
+- **Local Processing**: Speech recognition primarily occurs locally when available
+- **User Consent**: Comprehensive permission handling and user notification
+
+### Compliance Requirements
+- **ReplayKit Guidelines**: Uses approved audioApp capture path
+- **Background Execution**: Proper background mode declarations
+- **Battery Optimization**: Efficient resource usage and automatic cleanup
+
+**Section sources**
+- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
+- [Info.plist:17-22](file://FactShield/FactShield/Resources/Info.plist#L17-L22)
+- [AudioSessionManager.swift:34-50](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L34-L50)
 
 ## Troubleshooting Guide
-Common issues and remedies grounded in the codebase:
-- Broadcast does not start: Verify the extension Info.plist declares the correct extension point identifier and principal class, and that the App Group entitlements match in both targets.
-- No audio captured: Confirm the audio session is configured for voice-chat mode and mixing; ensure the input tap is installed and buffers are dispatched.
-- Transcription stops unexpectedly: Speech recognition restarts automatically on transient errors; check logs for recognition errors and ensure on-device recognition availability.
-- State desynchronization: Ensure the extension writes to shared UserDefaults and the main app reads the same keys; confirm the App Group identifier is identical.
-- Disk I/O contention: Writing raw PCM to a single shared file is simple but can cause contention; consider implementing a ring buffer or Darwin notifications for higher throughput.
+Enhanced troubleshooting guidance for the sophisticated broadcast extension system:
+
+### Common Issues and Solutions
+- **Audio Not Capturing**: Verify microphone permission handling and audio session activation
+- **Zero Buffer Count**: Check audio engine state and input node format validation
+- **Recognition Errors**: Monitor error code 1110 handling and pending buffer queue
+- **Memory Issues**: Validate rolling buffer trimming and memory constraints
+- **State Synchronization**: Ensure App Group identifier consistency and UserDefaults access
+
+### Diagnostic Information
+- **Audio Session Logs**: Permission states, category configuration, activation status
+- **Buffer Monitoring**: Flow validation and engine state diagnostics
+- **Speech Recognition**: Error codes, restart frequency, processing queue status
+- **File I/O**: Append operation success, file handle management, memory usage
+
+### Performance Monitoring
+- **Buffer Rate**: Track audio buffer reception frequency
+- **Memory Usage**: Monitor rolling buffer size and duration limits
+- **Recognition Latency**: Measure processing delays and restart intervals
+- **CPU Utilization**: Optimize buffer sizes and processing queues
 
 **Section sources**
-- [Info.plist:5-13](file://FactShield/FactShield/BroadcastExtension/Info.plist#L5-L13)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
-- [FactShield.entitlements:5-8](file://FactShield/FactShield/Resources/FactShield.entitlements#L5-L8)
-- [AudioSessionManager.swift:8-17](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L8-L17)
-- [AudioCaptureService.swift:19-40](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L19-L40)
-- [SpeechRecognitionService.swift:103-114](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L103-L114)
-- [SampleHandler.swift:14-17](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L14-L17)
-- [SampleHandler.swift:31-33](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L31-L33)
+- [AudioSessionManager.swift:75-83](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L75-L83)
+- [AudioCaptureService.swift:60-76](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L60-L76)
+- [SpeechRecognitionService.swift:101-110](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L101-L110)
+- [SampleHandler.swift:73-82](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L73-L82)
 
 ## Conclusion
-The broadcast extension integrates tightly with iOS’s ReplayKit to capture system audio and stream it to the main app via App Group IPC. The audio pipeline leverages AVFoundation and Speech frameworks to provide near-real-time transcription, while global state and constants ensure consistent behavior across targets. Adhering to the documented setup steps and performance considerations helps maintain reliability and battery life.
-
-[No sources needed since this section summarizes without analyzing specific files]
-
-## Appendices
-
-### Setup Instructions
-- Enable capabilities:
-  - Add App Groups with the identifier used by both targets.
-  - Add Microphone Usage Description and Speech Recognition Usage Description in the main app Info.plist.
-- Create the broadcast extension target:
-  - Choose Broadcast Upload Extension and set the bundle ID suffix and App Group.
-- Configure extension Info.plist:
-  - Set the extension point identifier, principal class, and sample buffer processing mode.
-- Entitlements:
-  - Ensure both the main app and extension declare the same App Group entitlement.
-
-**Section sources**
-- [FactShield-iOS-BuildInstructions.md:122-137](file://FactShield-iOS-BuildInstructions.md#L122-L137)
-- [Info.plist:5-22](file://FactShield/FactShield/Resources/Info.plist#L5-L22)
-- [Info.plist:5-13](file://FactShield/FactShield/BroadcastExtension/Info.plist#L5-L13)
-- [FactShield.entitlements:5-8](file://FactShield/FactShield/Resources/FactShield.entitlements#L5-L8)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
-
-### Security and Compliance Notes
-- App Group isolation: Data is confined to the declared App Group, preventing unauthorized access.
-- Sandboxing: The broadcast extension runs in a restricted process with memory limits; avoid retaining large buffers.
-- Guidelines adherence: Use ReplayKit’s approved audioApp capture path and respect user-initiated broadcasts.
-
-**Section sources**
-- [FactShield-iOS-BuildInstructions.md:2032-2032](file://FactShield-iOS-BuildInstructions.md#L2032-L2032)
-- [FactShield-Architecture.md:368-376](file://FactShield-Architecture.md#L368-L376)
+The enhanced broadcast extension implementation provides a robust, scalable solution for real-time audio capture and processing. The sophisticated audio pipeline, comprehensive error handling, and seamless app group communication deliver reliable performance while maintaining strict security and compliance standards. The system's modular architecture enables easy maintenance and future enhancements while providing optimal user experience for fact-checking applications.

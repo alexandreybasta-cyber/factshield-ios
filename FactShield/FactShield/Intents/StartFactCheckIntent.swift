@@ -4,24 +4,15 @@ import ActivityKit
 struct StartFactCheckIntent: AppIntent {
     static var title: LocalizedStringResource = "Quick Fact-Check"
     static var description: IntentDescription = "Start listening and fact-checking audio from any app"
-    static var openAppWhenRun: Bool = false  // Don't open the app — run in background
+    static var openAppWhenRun: Bool = false  // MUST be static — run in background like Shazam
     
-    @MainActor
+    // NO @MainActor — allows the system to run this intent entirely in the background
+    // without needing to foreground the app for main-thread access.
     func perform() async throws -> some IntentResult {
-        // Configure audio session
-        try await AudioSessionManager.shared.configureForCapture()
-        
-        // Start audio capture
-        AudioCaptureService.shared.startListening()
-        
-        // Start speech recognition
-        SpeechRecognitionService.shared.startRecognition()
-        
-        // Start Live Activity
-        try await ActivityManager.shared.startLiveActivity()
-        
-        // Start the fact-checking pipeline coordinator
-        FactCheckCoordinator.shared.startSession()
+        // The coordinator handles the entire pipeline in the correct order.
+        // startSession() is @MainActor so it will hop to main actor internally,
+        // but the intent itself doesn't require foreground execution.
+        await FactCheckCoordinator.shared.startSession()
         
         return .result()
     }

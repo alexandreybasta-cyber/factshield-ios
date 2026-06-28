@@ -1,3 +1,178 @@
+/* FactShield Side Panel — Light Orange Theme */
+
+/* Pulse animation for verifying state */
+@keyframes pulse-verify {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+.animate-pulse-verify {
+  animation: pulse-verify 1.5s ease-in-out infinite;
+}
+
+/* Slide-in animation for verdict cards */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.animate-slide-in {
+  animation: slide-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Confidence meter fill animation */
+@keyframes fill-meter {
+  from { width: 0%; }
+  to { width: var(--fill-width, 0%); }
+}
+.confidence-fill {
+  animation: fill-meter 0.8s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+  width: var(--fill-width, 0%);
+}
+
+/* Fade-in keyframes */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
+
+/* Status dot blinking animation */
+@keyframes blink-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+.animate-blink {
+  animation: blink-dot 1.2s ease-in-out infinite;
+}
+
+/* Progress bar animated gradient */
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+.progress-gradient {
+  background: linear-gradient(90deg, #F97316, #FB923C, #F97316);
+  background-size: 200% 100%;
+  animation: gradient-move 2s linear infinite;
+}
+
+/* Spinner animation */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 1.2s linear infinite;
+}
+
+/* Custom scrollbar styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #F9FAFB;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* Card hover effects */
+.verdict-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.verdict-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #D1D5DB;
+}
+
+/* Expandable sections */
+.expandable-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+  opacity: 0;
+}
+.expandable-content.expanded {
+  max-height: 500px;
+  opacity: 1;
+}
+
+/* Button press effect */
+.btn-press:active {
+  transform: scale(0.97);
+}
+
+/* Orange gradient button */
+.btn-orange-gradient {
+  background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+  transition: all 0.2s ease;
+}
+.btn-orange-gradient:hover {
+  background: linear-gradient(135deg, #EA580C 0%, #DC2626 100%);
+  box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);
+  transform: translateY(-1px);
+}
+.btn-orange-gradient:active {
+  transform: scale(0.97) translateY(0);
+}
+
+/* Toast notification */
+@keyframes toast-in {
+  from { transform: translate(-50%, -100%); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+@keyframes toast-out {
+  from { transform: translate(-50%, 0); opacity: 1; }
+  to { transform: translate(-50%, -100%); opacity: 0; }
+}
+.toast-enter {
+  animation: toast-in 0.3s ease-out forwards;
+}
+.toast-exit {
+  animation: toast-out 0.3s ease-in forwards;
+}
+
+/* Glow effect for active state (orange) */
+.glow-active {
+  box-shadow: 0 0 16px rgba(249, 115, 22, 0.35);
+}
+
+/* Shimmer loading skeleton (light theme) */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.shimmer {
+  background: linear-gradient(90deg, #F3F4F6 25%, #E5E7EB 50%, #F3F4F6 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Left accent border for verdict cards */
+.verdict-border-true { border-left: 3px solid #10B981; }
+.verdict-border-sub-true { border-left: 3px solid #14B8A6; }
+.verdict-border-misleading { border-left: 3px solid #F59E0B; }
+.verdict-border-false { border-left: 3px solid #EF4444; }
+.verdict-border-unverifiable { border-left: 3px solid #9CA3AF; }
+.verdict-border-pending { border-left: 3px solid #F97316; }
+
+/* Header gradient strip */
+.header-accent {
+  background: linear-gradient(90deg, #F97316, #FB923C, #FDBA74);
+}
 /* FactShield Side Panel — Custom Styles */
 
 /* Pulse animation for verifying state */

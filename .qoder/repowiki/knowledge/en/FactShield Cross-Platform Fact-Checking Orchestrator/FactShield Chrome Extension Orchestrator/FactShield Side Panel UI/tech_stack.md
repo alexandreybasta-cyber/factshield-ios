@@ -1,1 +1,0 @@
-Tailwind CSS via CDN with a custom dark-mode color palette configured in index.html.

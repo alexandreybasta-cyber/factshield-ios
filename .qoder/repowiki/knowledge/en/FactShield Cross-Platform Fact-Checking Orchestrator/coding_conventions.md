@@ -1,2 +1,0 @@
-- Use of typed enums for verdict states (e.g., TRUE, FALSE, MISLEADING) across both Swift and JavaScript implementations to ensure consistent UI rendering.
-- Implementation of retry logic with exponential backoff for all external API calls to handle rate limiting and transient network failures.

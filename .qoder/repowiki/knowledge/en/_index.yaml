@@ -3,48 +3,37 @@ schema_version: 1
 locale: en-US
 branch: main
 nodes_managed: true
-exported_at: "2026-06-28T10:49:37Z"
+exported_at: "2026-06-28T19:05:53Z"
 modules:
-    "":
-        dir_name: FactShield Cross-Platform Fact-Checking Orchestrator
-        title: FactShield Cross-Platform Fact-Checking Orchestrator
-        scope:
-            - '**'
-        source_files:
-            - FactShield/FactShield/Features/Home/HomeView.swift
-            - FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift
-            - FactShield/FactShield/Features/Settings/SettingsView.swift
-            - FactShield/FactShield/App/FactShieldApp.swift
-            - FactShield/FactShield/Widgets/FactShieldWidget.swift
-        children:
-            - factshield_chromeextension
-        depends_on: []
-        related_to: []
     build_system:
-        dir_name: iOS Build & Deployment Workflow
-        title: iOS Build & Deployment Workflow
+        dir_name: iOS & Chrome Build Workflows with API-Driven Deployment
+        title: iOS & Chrome Build Workflows with API-Driven Deployment
         scope: []
         source_files:
-            - FactShield-iOS-BuildInstructions.md
             - FactShield/Package.swift
-            - push-via-api.sh
             - FactShield/FactShield/Resources/Info.plist
+            - FactShield/FactShield/Resources/FactShield.entitlements
             - FactShield/FactShield/BroadcastExtension/Info.plist
-            - PROMPT-FOR-QODER.md
+            - FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements
+            - FactShield-ChromeExtension/manifest.json
+            - push-via-api.sh
+            - FactShield-iOS-BuildInstructions.md
         children: []
         depends_on: []
         related_to: []
     configuration_system:
-        dir_name: Configuration System — UserDefaults + Environment Variable Layering_2
+        dir_name: Configuration System — UserDefaults + Environment Variable Layering_3
         title: Configuration System — UserDefaults + Environment Variable Layering
         scope: []
         source_files:
-            - FactShield/FactShield/Utilities/Constants.swift
-            - FactShield/FactShield/Features/Settings/SettingsView.swift
             - FactShield/FactShield/Core/Network/QwenAPI.swift
             - FactShield/FactShield/Core/Network/SearchAPI.swift
+            - FactShield/FactShield/Features/Settings/SettingsView.swift
+            - FactShield/FactShield/Utilities/Constants.swift
             - FactShield/FactShield/Resources/Info.plist
-            - FactShield/FactShield/App/AppState.swift
+            - FactShield-ChromeExtension/src/options/options.js
+            - FactShield-ChromeExtension/src/shared/constants.js
+            - FactShield-ChromeExtension/manifest.json
         children: []
         depends_on: []
         related_to: []
@@ -56,66 +45,53 @@ modules:
             - FactShield/Package.swift
             - FactShield/FactShield/Core/Network/APIClient.swift
             - FactShield/FactShield/Core/Network/QwenAPI.swift
-            - FactShield-ChromeExtension/manifest.json
-            - FactShield-ChromeExtension/src/api/pipeline.js
+            - FactShield/FactShield/Core/Network/SearchAPI.swift
+            - FactShield/FactShield/Utilities/Constants.swift
         children: []
         depends_on: []
         related_to: []
     error_handling:
-        dir_name: Swift Error Handling with Typed Enums and Retry Logic
-        title: Swift Error Handling with Typed Enums and Retry Logic
+        dir_name: Typed Error Enums with Exponential Backoff Retry Strategy
+        title: Typed Error Enums with Exponential Backoff Retry Strategy
         scope: []
         source_files:
             - FactShield/FactShield/Core/Network/APIClient.swift
             - FactShield/FactShield/Models/Enums.swift
             - FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift
-            - FactShield/FactShield/Core/Claims/ClaimExtractionService.swift
-            - FactShield/FactShield/App/AppState.swift
-            - FactShield/FactShield/Utilities/Logger.swift
+            - FactShield/FactShield/Widgets/ActivityManager.swift
             - FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift
+            - FactShield/FactShield/Utilities/Logger.swift
+            - FactShield/FactShield/Core/Network/QwenAPI.swift
+            - FactShield-ChromeExtension/src/api/pipeline.js
         children: []
         depends_on: []
         related_to: []
-    factshield_chromeextension:
-        dir_name: FactShield Chrome Extension Orchestrator
-        title: FactShield Chrome Extension Orchestrator
-        scope:
-            - FactShield-ChromeExtension/
-        source_files: []
-        children:
-            - factshield_chromeextension/api_integrations
-            - factshield_chromeextension/sidepanel_ui
-        depends_on: []
-        related_to: []
-    factshield_chromeextension/api_integrations:
-        dir_name: Fact-Checking API Integrations & Pipeline Orchestration
-        title: Fact-Checking API Integrations & Pipeline Orchestration
-        scope:
-            - FactShield-ChromeExtension/src/api/
-        source_files: []
-        children: []
-        depends_on: []
-        related_to: []
-    factshield_chromeextension/sidepanel_ui:
-        dir_name: FactShield Side Panel UI
-        title: FactShield Side Panel UI
-        scope:
-            - FactShield-ChromeExtension/src/sidepanel/
-        source_files: []
+    frontend_style:
+        dir_name: Dual-Platform Frontend Styling System — SwiftUI Native + Tailwind CSS
+        title: Dual-Platform Frontend Styling System — SwiftUI Native + Tailwind CSS
+        scope: []
+        source_files:
+            - FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift
+            - FactShield/FactShield/Features/Home/HomeView.swift
+            - FactShield/FactShield/Features/Settings/SettingsView.swift
+            - FactShield/FactShield/App/FactShieldApp.swift
+            - FactShield-ChromeExtension/src/sidepanel/index.html
+            - FactShield-ChromeExtension/src/sidepanel/styles.css
+            - FactShield-ChromeExtension/src/sidepanel/app.js
         children: []
         depends_on: []
         related_to: []
     logging_system:
-        dir_name: OSLog-Based Structured Logging System_2
-        title: OSLog-Based Structured Logging System
+        dir_name: OSLog-Based Structured Logging with Domain-Specific Subsystems
+        title: OSLog-Based Structured Logging with Domain-Specific Subsystems
         scope: []
         source_files:
             - FactShield/FactShield/Utilities/Logger.swift
             - FactShield/FactShield/Core/Audio/AudioCaptureService.swift
-            - FactShield/FactShield/Core/Network/APIClient.swift
-            - FactShield/FactShield/Core/Claims/ClaimExtractionService.swift
             - FactShield/FactShield/Core/Network/QwenAPI.swift
+            - FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift
             - FactShield/FactShield/BroadcastExtension/SampleHandler.swift
+            - Xcode/FactShield/FactShield/Utilities/Logger.swift
         children: []
         depends_on: []
         related_to: []

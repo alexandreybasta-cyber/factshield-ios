@@ -1,0 +1,17 @@
+schema_version: 1
+module_path: error_handling
+title: Swift Typed Error Enums with Exponential Backoff Retry
+scope: []
+source_files:
+    - FactShield/FactShield/Models/Enums.swift
+    - FactShield/FactShield/Core/Network/APIClient.swift
+    - FactShield/FactShield/Core/Audio/AudioSessionManager.swift
+    - FactShield/FactShield/Core/Claims/ClaimExtractionService.swift
+    - FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift
+    - FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift
+    - FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift
+    - FactShield/FactShield/Utilities/Logger.swift
+    - FactShield-ChromeExtension/src/api/pipeline.js
+    - FactShield-ChromeExtension/src/background/service-worker.js
+depends_on: []
+related_to: []

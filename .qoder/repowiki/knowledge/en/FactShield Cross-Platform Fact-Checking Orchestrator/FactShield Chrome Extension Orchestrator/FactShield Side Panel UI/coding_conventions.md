@@ -1,3 +1,0 @@
-- UI updates follow a unidirectional data flow where state mutations trigger a full re-render of the #app container using template literals.
-- Event handlers defined in app.js are explicitly exposed on the window object to support inline onclick attributes in the generated HTML.
-- Verdict presentation relies on a centralized VERDICT_CONFIG map that supplies labels, colors, and Tailwind utility classes for consistent badge styling.

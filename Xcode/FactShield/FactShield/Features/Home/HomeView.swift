@@ -14,11 +14,7 @@ struct HomeView: View {
                             showSession = true
                         } else {
                             Task {
-                                try? await AudioSessionManager.shared.configureForCapture()
-                                AudioCaptureService.shared.startListening()
-                                SpeechRecognitionService.shared.startRecognition()
-                                try? await ActivityManager.shared.startLiveActivity()
-                                coordinator.startSession()
+                                await coordinator.startSession()
                                 showSession = true
                             }
                         }

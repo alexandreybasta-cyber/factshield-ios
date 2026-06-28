@@ -6,7 +6,7 @@ source_files:
     - FactShield/Package.swift
     - FactShield/FactShield/Core/Network/APIClient.swift
     - FactShield/FactShield/Core/Network/QwenAPI.swift
-    - FactShield/FactShield/Core/Network/SearchAPI.swift
-    - FactShield/FactShield/Utilities/Constants.swift
+    - FactShield-ChromeExtension/manifest.json
+    - FactShield-ChromeExtension/src/api/pipeline.js
 depends_on: []
 related_to: []

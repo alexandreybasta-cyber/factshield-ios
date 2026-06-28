@@ -1,5 +1,0 @@
-- **Orchestrator Pattern**: `pipeline.js` defines the `FactCheckPipeline` class, which acts as the central coordinator. It manages the lifecycle of a fact-check request, from initialization to status emission.
-- **Service Layer**: Three distinct service modules (`qwen.js`, `tavily.js`, `google-factcheck.js`) encapsulate interactions with external APIs. Each module exports pure functions that handle specific network requests and response parsing.
-- **Dependency Direction**: The orchestrator (`pipeline.js`) depends on the service modules. Services depend only on shared constants for URLs and configuration keys.
-- **Configuration Management**: API keys are loaded asynchronously from `chrome.storage.local` during pipeline initialization, ensuring credentials are not hardcoded.
-- **Evidence Aggregation**: The pipeline merges results from Tavily and Google Fact Check, normalizes their data structures, and deduplicates entries by URL before passing them to the LLM for synthesis.

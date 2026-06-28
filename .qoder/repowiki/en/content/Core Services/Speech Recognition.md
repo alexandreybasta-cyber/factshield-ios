@@ -18,43 +18,53 @@
 - [Enums.swift](file://FactShield/FactShield/Models/Enums.swift)
 </cite>
 
+## Update Summary
+**Changes Made**
+- Enhanced SpeechRecognitionService with improved on-device processing and seamless restart mechanism
+- Updated partial/final transcript handling with better error recovery and buffer management
+- Improved integration with the new fact-checking pipeline with enhanced logging and monitoring
+- Added comprehensive buffer queuing system to prevent audio loss during recognition restarts
+- Enhanced transcript management with both word-count and time-based retention policies
+
 ## Table of Contents
 1. [Introduction](#introduction)
 2. [Project Structure](#project-structure)
 3. [Core Components](#core-components)
 4. [Architecture Overview](#architecture-overview)
 5. [Detailed Component Analysis](#detailed-component-analysis)
-6. [Dependency Analysis](#dependency-analysis)
-7. [Performance Considerations](#performance-considerations)
-8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#conclusion)
-10. [Appendices](#appendices)
+6. [Enhanced Speech Recognition Processing](#enhanced-speech-recognition-processing)
+7. [Buffer Management System](#buffer-management-system)
+8. [Real-time Transcript Handling](#real-time-transcript-handling)
+9. [Integration with Fact-Checking Pipeline](#integration-with-fact-checking-pipeline)
+10. [Performance Optimizations](#performance-optimizations)
+11. [Troubleshooting Guide](#troubleshooting-guide)
+12. [Conclusion](#conclusion)
+13. [Appendices](#appendices)
 
 ## Introduction
-This document explains the on-device speech recognition services that power live transcription in the FactShield iOS application. It covers how audio is captured and preprocessed, how the Speech framework performs on-device recognition, and how transcripts are managed and refined over time. It also documents the integration with claim extraction and verification services to form a complete real-time fact-checking pipeline.
+This document explains the enhanced on-device speech recognition services that power live transcription in the FactShield iOS application. The system has been significantly improved with better on-device processing, seamless recognition restarts, and robust partial/final transcript handling. It covers how audio is captured and preprocessed, how the Speech framework performs on-device recognition, and how transcripts are managed and refined over time. The enhanced system now provides improved reliability, reduced latency, and better integration with the complete fact-checking pipeline.
 
 ## Project Structure
-The speech recognition subsystem is organized around three core areas:
-- Audio capture and buffering: capturing microphone PCM buffers and delivering them to the recognizer.
-- Speech recognition: configuring and running on-device recognition with partial results.
-- Transcript management: maintaining a rolling transcript buffer and exposing recent segments.
+The speech recognition subsystem has been restructured around a more robust architecture with enhanced buffer management and improved error handling:
+
+- **Audio Layer**: Enhanced audio capture with monitoring, buffer queuing, and format validation
+- **Speech Layer**: Improved recognition service with seamless restarts and enhanced logging
+- **Transcript Management**: Dual-policy management (word-count and time-based retention)
+- **Pipeline Integration**: Tight integration with claim extraction and verification services
 
 ```mermaid
 graph TB
-subgraph "Audio Layer"
-AC["AudioCaptureService"]
-ABP["AudioBufferProcessor"]
-ASM["AudioSessionManager"]
+subgraph "Enhanced Audio Layer"
+AC["AudioCaptureService<br/>+ Buffer Monitoring"]
+ABP["AudioBufferProcessor<br/>+ Queue Management"]
+ASM["AudioSessionManager<br/>+ Async Configuration"]
 end
-subgraph "Speech Layer"
-SRS["SpeechRecognitionService"]
-TM["TranscriptManager"]
+subgraph "Improved Speech Layer"
+SRS["SpeechRecognitionService<br/>+ Seamless Restarts"]
+TM["TranscriptManager<br/>+ Dual Policy Retention"]
 end
-subgraph "Pipeline Orchestration"
-FC["FactCheckCoordinator"]
-FCSV["FactCheckSessionView"]
-end
-subgraph "Verification Services"
+subgraph "Enhanced Pipeline"
+FC["FactCheckCoordinator<br/>+ Real-time Processing"]
 CES["ClaimExtractionService"]
 ERS["EvidenceRetrievalService"]
 VSS["VerdictSynthesisService"]
@@ -64,58 +74,40 @@ ASM --> AC
 SRS --> TM
 FC --> AC
 FC --> SRS
+FC --> TM
 FC --> CES
 FC --> ERS
 FC --> VSS
-FCSV --> FC
 ```
 
 **Diagram sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
 - [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
-- [FactCheckSessionView.swift:1-506](file://FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift#L1-L506)
-- [ClaimExtractionService.swift:1-152](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L1-L152)
-- [EvidenceRetrievalService.swift:1-233](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L1-L233)
-- [VerdictSynthesisService.swift:1-184](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L1-L184)
-
-**Section sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
-- [FactCheckSessionView.swift:1-506](file://FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift#L1-L506)
-- [ClaimExtractionService.swift:1-152](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L1-L152)
-- [EvidenceRetrievalService.swift:1-233](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L1-L233)
-- [VerdictSynthesisService.swift:1-184](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L1-L184)
 
 ## Core Components
-- SpeechRecognitionService: Orchestrates on-device speech recognition, manages partial and final results, and maintains a rolling transcript buffer.
-- TranscriptManager: Provides segmented transcript management with timestamps, confidence, and filtering by recency.
-- AudioCaptureService: Captures PCM audio from the microphone and streams buffers to the processor.
-- AudioBufferProcessor: Accumulates recent buffers and forwards them to the speech recognizer.
-- AudioSessionManager: Configures the audio session for optimal capture conditions (e.g., voice chat with AEC).
-- FactCheckCoordinator: Wires audio capture, speech recognition, and periodic claim extraction into a cohesive pipeline.
-- ClaimExtractionService, EvidenceRetrievalService, VerdictSynthesisService: Provide downstream processing of recognized text into actionable claims and verifiable conclusions.
+The enhanced system consists of several key components working together:
+
+- **SpeechRecognitionService**: Now features seamless restart mechanism, improved error handling, and enhanced on-device processing
+- **TranscriptManager**: Implements dual retention policies (word-count and time-based) for optimal memory management
+- **AudioCaptureService**: Enhanced with buffer monitoring, format validation, and improved error reporting
+- **AudioBufferProcessor**: Features sophisticated queue management and buffer trimming algorithms
+- **AudioSessionManager**: Provides asynchronous session configuration with comprehensive error handling
+- **FactCheckCoordinator**: Orchestrates the complete real-time fact-checking pipeline with enhanced timing controls
 
 **Section sources**
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
 - [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
-- [ClaimExtractionService.swift:1-152](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L1-L152)
-- [EvidenceRetrievalService.swift:1-233](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L1-L233)
-- [VerdictSynthesisService.swift:1-184](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L1-L184)
 
 ## Architecture Overview
-The system captures audio, feeds it to the speech recognizer, and continuously updates a rolling transcript. The FactCheckCoordinator periodically extracts claims from recent speech and drives the verification pipeline.
+The enhanced system provides seamless real-time processing with improved reliability and reduced latency. The architecture now includes sophisticated buffer management, error recovery mechanisms, and real-time monitoring.
 
 ```mermaid
 sequenceDiagram
@@ -130,8 +122,9 @@ participant Synth as "VerdictSynthesisService"
 UI->>Coord : Start session
 Coord->>Audio : startListening()
 Coord->>SR : startRecognition()
-Audio-->>Proc : onAudioBuffer callback
+Audio->>Proc : onAudioBuffer callback
 Proc->>SR : processAudioBuffer()
+Note over Proc : Buffer monitoring active
 loop Every ~15s
 Coord->>SR : getRecentTranscript(30s)
 SR-->>Coord : recent text
@@ -155,47 +148,36 @@ Coord->>SR : stopRecognition()
 **Diagram sources**
 - [FactCheckSessionView.swift:57-76](file://FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift#L57-L76)
 - [FactCheckCoordinator.swift:38-161](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L38-L161)
-- [AudioCaptureService.swift:19-49](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L19-L49)
+- [AudioCaptureService.swift:21-77](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L21-L77)
 - [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
-- [SpeechRecognitionService.swift:41-101](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L41-L101)
-- [ClaimExtractionService.swift:18-56](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L18-L56)
-- [EvidenceRetrievalService.swift:16-63](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L16-L63)
-- [VerdictSynthesisService.swift:30-80](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L30-L80)
+- [SpeechRecognitionService.swift:48-114](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L48-L114)
 
 ## Detailed Component Analysis
 
-### SpeechRecognitionService
-Responsibilities:
-- Initialize and authorize the speech recognizer for the desired locale.
-- Configure requests for partial results and punctuation, preferring on-device recognition when available.
-- Manage recognition lifecycle: start, append buffers, handle callbacks, and stop.
-- Maintain a rolling transcript buffer capped by word count and expose recent text windows.
+### Enhanced SpeechRecognitionService
+The SpeechRecognitionService has been significantly improved with better error handling, seamless restart mechanisms, and enhanced logging:
 
-Key behaviors:
-- Partial result handling: updates current transcript and appends to rolling buffer on each interim result.
-- Final result handling: logs final transcript when received.
-- Error handling: logs errors and restarts recognition after a brief delay to recover from transient issues.
-- On-device preference: sets requiresOnDeviceRecognition when supported by the device.
+**Key Enhancements:**
+- **Seamless Restart Mechanism**: Eliminates audio loss during recognition restarts using pending buffer queues
+- **Improved Error Recovery**: Handles "No speech detected" errors (error 1110) without disrupting the pipeline
+- **Enhanced Logging**: Comprehensive logging for debugging and monitoring
+- **Better Memory Management**: Optimized transcript buffer with word-count limits
+- **Async Processing**: Uses serialization queues for thread-safe operations
 
-Configuration highlights:
-- Locale set during initialization.
-- Partial results enabled.
-- Punctuation enabled.
-- On-device recognition preferred when available.
-
-Processing logic:
-- startRecognition creates a request, cancels any existing task, and starts a new recognition task.
-- processAudioBuffer appends captured PCM buffers to the active request.
-- stopRecognition ends audio, cancels the task, and returns the full transcript.
+**New Features:**
+- Pending buffer management to prevent audio loss during restarts
+- Immediate restart capability without delays
+- Enhanced partial result handling with better error recovery
+- Improved on-device recognition preference handling
 
 ```mermaid
 flowchart TD
 Start(["startRecognition"]) --> CheckAvail["Check recognizer availability"]
 CheckAvail --> |Unavailable| LogErr["Log error and return"]
 CheckAvail --> |Available| CancelPrev["Cancel previous task"]
-CancelPrev --> CreateReq["Create SFSpeechAudioBufferRecognitionRequest<br/>enable partial results, add punctuation"]
+CancelPrev --> CreateReq["Create SFSpeechAudioBufferRecognitionRequest<br/>enable partial results, adds punctuation"]
 CreateReq --> OnDev{"Supports on-device?"}
-OnDev --> |Yes| SetOnDev["Set requiresOnDeviceRecognition=true"]
+OnDev --> |Yes| SetOnDev["Set requiresOnDeviceRecognition=false<br/>(preferred, not required)"]
 OnDev --> |No| Proceed["Proceed"]
 SetOnDev --> StartTask["Start recognitionTask with result handler"]
 Proceed --> StartTask
@@ -203,30 +185,36 @@ StartTask --> Loop["Receive result/error"]
 Loop --> Result{"result?"}
 Result --> |Yes| Update["Update currentTranscript and buffer"]
 Update --> IsFinal{"isFinal?"}
-IsFinal --> |Yes| LogFinal["Log final transcript"]
+IsFinal --> |Yes| FlushPending["Flush pending buffers"]
+FlushPending --> Restart["restartRecognition()"]
 IsFinal --> |No| Loop
 Result --> |No| Err{"error?"}
-Err --> |Yes| Restart["restartRecognition after delay"]
-Err --> |No| Loop
+Err --> |Yes| CheckErr{"Error 1110?"}
+CheckErr --> |Yes| LogSilence["Log 'No speech detected'"] --> Restart
+CheckErr --> |No| LogErr["Log error"] --> Restart
 Restart --> Start
 ```
 
 **Diagram sources**
-- [SpeechRecognitionService.swift:23-114](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L23-L114)
+- [SpeechRecognitionService.swift:48-167](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L48-L167)
 
 **Section sources**
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
+- [SpeechRecognitionService.swift:1-191](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L191)
 
 ### TranscriptManager
-Responsibilities:
-- Maintain a list of TranscriptSegment entries with text, timestamp, speaker, confidence, and finality flag.
-- Provide recent transcript text filtered by a configurable time window.
-- Enforce a maximum retention period to keep memory bounded.
+The TranscriptManager now implements a dual-policy retention system combining word-count limits with time-based cleanup:
 
-Key behaviors:
-- addSegment accepts either a structured segment or convenience parameters and appends to the list.
-- recentTranscript filters segments newer than a cutoff and joins their text.
-- trimOldSegments ensures segments older than five minutes are removed.
+**Enhanced Features:**
+- **Dual Policy Management**: Combines word-count limits (2000 words) with 5-minute time-based retention
+- **Enhanced Filtering**: Improved recent transcript extraction with configurable time windows
+- **Better Memory Management**: Automatic cleanup of old segments prevents memory bloat
+- **Structured Segments**: Supports TranscriptSegment objects with confidence and finality tracking
+
+**Key Behaviors:**
+- `recentTranscript(seconds:)`: Extracts recent speech using time-based filtering
+- `addSegment(text:isFinal:confidence:)`: Convenience method for simple segment addition
+- `trimOldSegments()`: Automatic cleanup of segments older than 5 minutes
+- `reset()`: Complete transcript buffer reset with logging
 
 ```mermaid
 classDiagram
@@ -247,220 +235,232 @@ class TranscriptSegment {
 +confidence : Double
 +isFinal : Bool
 }
+class SpeechRecognitionService {
+-currentTranscript : String
+-transcriptBuffer : [String]
+-maxTranscriptWords : Int
++getFullTranscript() String
++getRecentTranscript(seconds) String
+-updateTranscriptBuffer(newTranscript)
+}
 TranscriptManager --> TranscriptSegment : "manages"
+SpeechRecognitionService --> TranscriptManager : "integrates with"
 ```
 
 **Diagram sources**
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [FactCheckSession.swift:37-53](file://FactShield/FactShield/Models/FactCheckSession.swift#L37-L53)
+- [SpeechRecognitionService.swift:169-189](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L169-L189)
 
 **Section sources**
 - [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
 - [FactCheckSession.swift:37-53](file://FactShield/FactShield/Models/FactCheckSession.swift#L37-L53)
 
-### AudioCaptureService
-Responsibilities:
-- Configure an AVAudioEngine input node tap to stream PCM buffers.
-- Expose a callback for downstream processing.
-- Start and stop listening safely, managing engine lifecycle.
+### Enhanced AudioCaptureService
+The AudioCaptureService has been improved with better monitoring, format validation, and error reporting:
 
-Key behaviors:
-- Uses a dedicated queue for buffer delivery to maintain responsiveness.
-- Logs session format and errors during engine preparation/start.
+**New Capabilities:**
+- **Buffer Monitoring**: Monitors audio flow and reports zero-buffer conditions after 1-second delays
+- **Format Validation**: Validates input format before establishing taps to prevent runtime errors
+- **Enhanced Error Handling**: Comprehensive logging for audio session and engine preparation failures
+- **Improved Buffer Delivery**: Uses high-priority queues for responsive audio processing
 
-Integration:
-- Provides buffers to AudioBufferProcessor via onAudioBuffer callback.
+**Key Improvements:**
+- Zero-buffer detection with detailed diagnostic information
+- Format validation before tap installation
+- Enhanced logging for debugging audio routing issues
+- Better resource cleanup with proper engine shutdown
 
 **Section sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
 
 ### AudioBufferProcessor
-Responsibilities:
-- Accumulate recent audio buffers to maintain context for recognition.
-- Trim accumulation to limit memory/duration.
-- Forward buffers to the speech recognizer.
+The AudioBufferProcessor now features sophisticated buffer management and trimming algorithms:
 
-Key behaviors:
-- Maintains a rolling list of buffers and trims by duration or count thresholds.
-- Immediately forwards each incoming buffer to the speech recognizer.
+**Enhanced Features:**
+- **Rolling Buffer Management**: Maintains up to 30 seconds of accumulated audio with intelligent trimming
+- **Smart Trimming Algorithm**: Balances duration and count thresholds for optimal memory usage
+- **Improved Processing**: Streams buffers to speech recognizer in chunks while maintaining context
+- **Reset Capability**: Allows clearing of accumulated buffers for clean restarts
+
+**Technical Details:**
+- Maximum 30 seconds of accumulated audio (duration-based trimming)
+- Upper limit of 100 buffers with automatic pruning to 50 most recent
+- Real-time trimming during buffer accumulation
+- Thread-safe processing with proper synchronization
 
 **Section sources**
 - [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
 
-### AudioSessionManager
-Responsibilities:
-- Configure the audio session for capture with appropriate category, mode, and options.
-- Deactivate the session when stopping.
+### Enhanced AudioSessionManager
+The AudioSessionManager now provides asynchronous configuration with comprehensive error handling:
 
-Key behaviors:
-- Sets category to play-and-record with voice-chat mode to enable AEC.
-- Enables Bluetooth A2DP and mix-with-others options.
-- Logs configuration and deactivation outcomes.
+**New Asynchronous Features:**
+- **Async Configuration**: Non-blocking audio session setup with proper permission handling
+- **Comprehensive Error Handling**: Structured error types for different failure scenarios
+- **Detailed Logging**: Extensive logging for audio routing and session state
+- **Graceful Degradation**: Handles permission denials and configuration failures gracefully
 
-**Section sources**
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-
-### FactCheckCoordinator
-Responsibilities:
-- Wire audio capture, speech recognition, and periodic claim extraction.
-- Drive the end-to-end pipeline: extract claims from recent transcript, retrieve evidence, synthesize verdict, and update Live Activity.
-
-Key behaviors:
-- Starts timers to periodically extract claims from the last 30 seconds of speech.
-- Filters claims by check-worthiness and proceeds with verification.
-- Updates Live Activity with current state and results.
-
-Integration points:
-- Subscribes to AudioCaptureService.onAudioBuffer to feed the speech recognizer.
-- Uses SpeechRecognitionService.getRecentTranscript(seconds:) for periodic extraction.
+**Key Improvements:**
+- Asynchronous permission request handling
+- Detailed error categorization with user-friendly messages
+- Post-activation delay for proper audio routing
+- Comprehensive session state logging for debugging
 
 **Section sources**
-- [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
+- [AudioSessionManager.swift:1-91](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L91)
 
-### ClaimExtractionService
-Responsibilities:
-- Transform recent transcript text into structured claims using an LLM.
-- Parse and validate JSON responses, with fallback parsing strategies.
-- Track extracted claims and expose filtering helpers.
+## Enhanced Speech Recognition Processing
+The enhanced speech recognition processing pipeline provides improved reliability and performance:
 
-Key behaviors:
-- Sends a curated prompt to the LLM to extract verifiable claims.
-- Parses responses into Claim objects with check-worthiness and status.
-- Cleans JSON responses to handle markdown fences.
+**Processing Flow:**
+1. **Initialization**: Audio session configured, speech recognizer authorized
+2. **Continuous Recognition**: Partial results streamed with punctuation and confidence
+3. **Context Management**: Rolling buffer maintains 30 seconds of audio context
+4. **Error Recovery**: Seamless restarts without audio loss
+5. **Transcript Management**: Word-count limited rolling buffer with final result handling
 
-**Section sources**
-- [ClaimExtractionService.swift:1-152](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L1-L152)
-- [Claim.swift:1-37](file://FactShield/FactShield/Core/Claims/Claim.swift#L1-L37)
-
-### EvidenceRetrievalService
-Responsibilities:
-- Aggregate evidence from multiple providers asynchronously.
-- Deduplicate by URL, sort by weighted scores, and return top results.
-
-Key behaviors:
-- Executes parallel searches against simulated providers using the LLM.
-- Parses provider responses into Evidence objects with relevance and credibility.
-- Returns top-N results respecting configured limits.
+**Key Improvements:**
+- **Seamless Context Preservation**: Pending buffer system prevents audio loss during restarts
+- **Enhanced Error Handling**: Specific handling for "No speech detected" errors
+- **Optimized Restart Logic**: Immediate restart without artificial delays
+- **Improved Memory Management**: Balanced approach to buffer retention and cleanup
 
 **Section sources**
-- [EvidenceRetrievalService.swift:1-233](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L1-L233)
+- [SpeechRecognitionService.swift:48-167](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L48-L167)
 
-### VerdictSynthesisService
-Responsibilities:
-- Synthesize a final verdict from a claim and supporting evidence.
-- Support a fallback mode when no external evidence is available.
+## Buffer Management System
+The enhanced buffer management system ensures reliable audio processing with minimal loss:
 
-Key behaviors:
-- Builds a structured prompt with claim and evidence.
-- Parses JSON responses into Verdict objects with confidence and reasoning.
-- Handles missing content and invalid JSON gracefully.
+**Buffer Architecture:**
+- **Pending Buffer Queue**: Temporary storage for audio during recognition restarts
+- **Accumulated Buffer Pool**: Rolling storage of recent audio with smart trimming
+- **Serialization Queues**: Thread-safe access to buffers and recognition requests
+- **Memory Optimization**: Automatic cleanup based on duration and count thresholds
 
-**Section sources**
-- [VerdictSynthesisService.swift:1-184](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L1-L184)
-
-## Dependency Analysis
-The following diagram shows the primary runtime dependencies among the speech and pipeline components.
-
-```mermaid
-graph LR
-AudioCaptureService --> AudioBufferProcessor
-AudioBufferProcessor --> SpeechRecognitionService
-AudioSessionManager --> AudioCaptureService
-SpeechRecognitionService --> TranscriptManager
-FactCheckCoordinator --> AudioCaptureService
-FactCheckCoordinator --> SpeechRecognitionService
-FactCheckCoordinator --> ClaimExtractionService
-FactCheckCoordinator --> EvidenceRetrievalService
-FactCheckCoordinator --> VerdictSynthesisService
-FactCheckSessionView --> FactCheckCoordinator
-```
-
-**Diagram sources**
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
-- [FactCheckSessionView.swift:1-506](file://FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift#L1-L506)
-- [ClaimExtractionService.swift:1-152](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L1-L152)
-- [EvidenceRetrievalService.swift:1-233](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L1-L233)
-- [VerdictSynthesisService.swift:1-184](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L1-L184)
+**Management Algorithms:**
+- **Duration-Based Trimming**: Limits accumulated audio to 30 seconds
+- **Count-Based Pruning**: Maintains maximum 100 buffers with 50-buffer safety margin
+- **Priority Queuing**: High-priority queues ensure responsive audio processing
+- **Resource Cleanup**: Proper disposal of buffers and audio resources
 
 **Section sources**
-- [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
-- [SpeechRecognitionService.swift:1-138](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L1-L138)
-- [AudioCaptureService.swift:1-51](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L51)
-- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
-- [AudioSessionManager.swift:1-23](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L1-L23)
-- [TranscriptManager.swift:1-53](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L1-L53)
-- [ClaimExtractionService.swift:1-152](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L1-L152)
-- [EvidenceRetrievalService.swift:1-233](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L1-L233)
-- [VerdictSynthesisService.swift:1-184](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L1-L184)
+- [SpeechRecognitionService.swift:23-26](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L23-L26)
+- [AudioBufferProcessor.swift:12-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L12-L36)
 
-## Performance Considerations
-- On-device recognition: Enabled when supported to reduce latency and preserve privacy.
-- Partial results: Enabled to provide near-real-time feedback while minimizing restarts.
-- Buffer management: AudioBufferProcessor trims accumulated buffers by duration and count to bound memory usage.
-- Rolling transcript: SpeechRecognitionService caps word count and TranscriptManager caps retention time to prevent unbounded growth.
-- Concurrency: Audio buffers are delivered on a high-priority queue to minimize UI stalls.
-- Session configuration: Voice-chat mode enables AEC and optimizes for speech quality.
+## Real-time Transcript Handling
+The system now provides sophisticated real-time transcript management with multiple retention policies:
 
-[No sources needed since this section provides general guidance]
+**Transcript Management Features:**
+- **Word-Count Limiting**: Rolling buffer capped at 2000 words for memory efficiency
+- **Time-Based Retention**: Automatic cleanup of segments older than 5 minutes
+- **Recent Window Extraction**: Configurable time-based transcript extraction (default 30 seconds)
+- **Confidence Tracking**: Optional confidence scoring for transcript segments
+
+**Processing Logic:**
+- **Continuous Updates**: Real-time transcript updates with partial results
+- **Final Result Handling**: Proper handling of final transcripts with restart triggers
+- **Memory Optimization**: Efficient word-based buffer management
+- **Thread Safety**: Protected access to transcript data structures
+
+**Section sources**
+- [SpeechRecognitionService.swift:169-189](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L169-L189)
+- [TranscriptManager.swift:19-46](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L19-L46)
+
+## Integration with Fact-Checking Pipeline
+The enhanced system provides tight integration with the complete fact-checking pipeline:
+
+**Pipeline Integration Points:**
+- **Real-time Claim Extraction**: Periodic extraction of claims from recent 30-second transcripts
+- **Evidence Retrieval**: Automated evidence gathering for extracted claims
+- **Verdict Synthesis**: Comprehensive fact-checking with confidence scoring
+- **Live Activity Updates**: Real-time status updates for user interface
+
+**Enhanced Coordination:**
+- **Coordinated Timing**: 15-second intervals for claim extraction with immediate startup
+- **State Synchronization**: Real-time updates to UI components and activity states
+- **Error Propagation**: Graceful handling of pipeline failures with user notifications
+- **Resource Management**: Coordinated startup and shutdown of all pipeline components
+
+**Section sources**
+- [FactCheckCoordinator.swift:68-161](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L68-L161)
+- [FactCheckSessionView.swift:57-76](file://FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift#L57-L76)
+
+## Performance Optimizations
+The enhanced system incorporates several performance improvements:
+
+**Optimization Strategies:**
+- **Reduced Latency**: Immediate recognition restarts eliminate processing delays
+- **Memory Efficiency**: Dual-policy retention prevents memory bloat while maintaining context
+- **CPU Optimization**: Thread-safe processing with appropriate queue priorities
+- **Network Efficiency**: Batch processing in the fact-checking pipeline reduces API calls
+
+**Key Performance Metrics:**
+- **Recognition Latency**: Reduced restart delays for seamless processing
+- **Memory Usage**: Controlled growth with 2000-word buffer limit and 5-minute retention
+- **Audio Quality**: 4096-byte buffer size for reliable audio delivery
+- **Pipeline Throughput**: 15-second extraction intervals balance responsiveness with efficiency
+
+**Section sources**
+- [SpeechRecognitionService.swift:146-167](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L146-L167)
+- [AudioCaptureService.swift:38-46](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L38-L46)
 
 ## Troubleshooting Guide
-Common issues and diagnostics:
-- Speech recognition not authorized: The service logs warnings when authorization is denied or restricted. Ensure permissions are granted in Settings.
-- Speech recognizer unavailable: The service logs an error and avoids starting recognition. Check device compatibility and OS version.
-- Recognition errors: The service attempts to restart recognition after a short delay. Persistent errors indicate underlying audio or system issues.
-- Audio session configuration: Errors during session activation are logged. Verify Bluetooth connectivity and other audio interruptions.
-- Claim extraction failures: JSON parsing errors trigger fallback strategies. Review prompt formatting and API responses.
-- Evidence retrieval failures: Provider calls are retried independently; failures are logged as warnings. Inspect network connectivity and provider quotas.
-- Verdict synthesis failures: Invalid JSON or unexpected verdict types are handled with explicit errors. Validate provider outputs and decoding logic.
+Enhanced troubleshooting capabilities with comprehensive logging and diagnostic information:
+
+**Enhanced Diagnostics:**
+- **Audio Session Issues**: Detailed logging for permission denials, configuration failures, and activation problems
+- **Recognition Problems**: Comprehensive error logging with specific error codes and recovery actions
+- **Buffer Flow Issues**: Zero-buffer detection with audio routing diagnostics
+- **Pipeline Failures**: Structured error handling with user-friendly messages
+
+**Diagnostic Information:**
+- **Audio Capture**: Buffer count monitoring, format validation results, and engine state logs
+- **Speech Recognition**: Error codes, restart statistics, and recognition status logs
+- **Session Management**: Permission states, routing information, and configuration details
+- **Pipeline Coordination**: Timing information, state transitions, and processing statistics
 
 **Section sources**
-- [SpeechRecognitionService.swift:28-39](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L28-L39)
-- [SpeechRecognitionService.swift:42-45](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L42-L45)
-- [SpeechRecognitionService.swift:76-78](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L76-L78)
-- [AudioSessionManager.swift:34-39](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L34-L39)
-- [ClaimExtractionService.swift:80-106](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L80-L106)
-- [EvidenceRetrievalService.swift:28-44](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L28-L44)
-- [VerdictSynthesisService.swift:144-150](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L144-L150)
+- [AudioCaptureService.swift:60-76](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L60-L76)
+- [SpeechRecognitionService.swift:101-110](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L101-L110)
+- [AudioSessionManager.swift:34-82](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L34-L82)
 
 ## Conclusion
-The speech recognition subsystem integrates audio capture, on-device recognition, and rolling transcript management to deliver responsive, privacy-preserving transcription. Combined with periodic claim extraction and robust verification services, it forms a complete pipeline for live fact-checking. The design emphasizes resilience, performance, and modularity, enabling straightforward extension and maintenance.
-
-[No sources needed since this section summarizes without analyzing specific files]
+The enhanced speech recognition subsystem represents a significant improvement in reliability, performance, and user experience. The new system provides seamless real-time processing with robust error recovery, sophisticated buffer management, and tight integration with the complete fact-checking pipeline. Key improvements include seamless recognition restarts, enhanced error handling, comprehensive logging, and optimized memory management. These enhancements enable the system to provide responsive, privacy-preserving transcription while maintaining the integrity of the fact-checking workflow.
 
 ## Appendices
 
 ### Practical Setup Examples
-- Starting a session:
-  - Configure audio session, start audio capture, start speech recognition, and launch the Live Activity.
-  - Stop the session by canceling timers, stopping audio capture, stopping recognition, and deactivating the audio session.
-- Transcript processing:
-  - Use recent transcript windows to extract claims periodically and refine the rolling buffer.
-- Integration with claim extraction:
-  - Extract claims from recent speech, filter by check-worthiness, and proceed with evidence retrieval and verdict synthesis.
+**Enhanced Setup Process:**
+- **System Initialization**: Configure audio session asynchronously, validate permissions, then start audio capture
+- **Recognition Setup**: Initialize speech recognizer with proper authorization, configure recognition parameters
+- **Pipeline Integration**: Connect audio capture to buffer processor, establish speech recognition callbacks
+- **Monitoring and Maintenance**: Implement buffer monitoring, regular health checks, and graceful error recovery
 
 **Section sources**
 - [FactCheckSessionView.swift:57-76](file://FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift#L57-L76)
-- [FactCheckCoordinator.swift:87-161](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L87-L161)
-- [SpeechRecognitionService.swift:132-136](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L132-L136)
-- [ClaimExtractionService.swift:18-56](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L18-L56)
+- [AudioSessionManager.swift:27-83](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L27-L83)
+- [SpeechRecognitionService.swift:30-33](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L30-L33)
 
 ### Configuration Options
-- Recognition language and locale:
-  - Set during initialization of the speech recognizer.
-- Acoustic model preferences:
-  - Prefers on-device recognition when available; otherwise falls back to cloud-based recognition.
-- Performance tuning:
-  - Partial results enabled for responsiveness.
-  - Rolling buffers trimmed by duration and word count to balance accuracy and memory usage.
-  - Audio session configured for voice chat with AEC and Bluetooth support.
+**Enhanced Configuration Parameters:**
+- **Recognition Settings**: Locale configuration, partial results enabled, punctuation support, on-device preference
+- **Buffer Management**: 30-second audio accumulation limit, 2000-word transcript buffer, 5-minute retention policy
+- **Processing Tuning**: 15-second extraction intervals, 4096-byte buffer size, high-priority processing queues
+- **Error Handling**: Specific error code handling, automatic recovery mechanisms, comprehensive logging
 
 **Section sources**
-- [SpeechRecognitionService.swift:24-26](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L24-L26)
-- [SpeechRecognitionService.swift:56-59](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L56-L59)
-- [AudioBufferProcessor.swift:14-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L14-L36)
-- [AudioSessionManager.swift:10-16](file://FactShield/FactShield/Core/Audio/AudioSessionManager.swift#L10-L16)
+- [SpeechRecognitionService.swift:30-33](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L30-L33)
+- [SpeechRecognitionService.swift:64-73](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L64-L73)
+- [AudioBufferProcessor.swift:12-14](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L12-L14)
+- [TranscriptManager.swift:42-46](file://FactShield/FactShield/Core/Speech/TranscriptManager.swift#L42-L46)
+
+### Integration Patterns
+**Enhanced Integration Approaches:**
+- **Real-time Processing**: Continuous audio streaming with periodic claim extraction and evidence retrieval
+- **Error Resilience**: Graceful handling of recognition errors with automatic recovery and user notification
+- **Resource Coordination**: Synchronized startup and shutdown of audio capture, speech recognition, and pipeline components
+- **State Management**: Real-time updates to UI components, activity states, and processing indicators
+
+**Section sources**
+- [FactCheckCoordinator.swift:68-161](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L68-L161)
+- [SpeechRecognitionService.swift:146-167](file://FactShield/FactShield/Core/Speech/SpeechRecognitionService.swift#L146-L167)

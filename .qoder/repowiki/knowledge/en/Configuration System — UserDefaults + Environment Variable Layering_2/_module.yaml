@@ -4,10 +4,11 @@ title: Configuration System — UserDefaults + Environment Variable Layering
 scope: []
 source_files:
     - FactShield/FactShield/Utilities/Constants.swift
-    - FactShield/FactShield/Features/Settings/SettingsView.swift
     - FactShield/FactShield/Core/Network/QwenAPI.swift
     - FactShield/FactShield/Core/Network/SearchAPI.swift
-    - FactShield/FactShield/Resources/Info.plist
-    - FactShield/FactShield/App/AppState.swift
+    - FactShield/FactShield/Features/Settings/SettingsView.swift
+    - FactShield-ChromeExtension/src/shared/constants.js
+    - FactShield-ChromeExtension/src/options/options.js
+    - FactShield-ChromeExtension/src/api/pipeline.js
 depends_on: []
 related_to: []

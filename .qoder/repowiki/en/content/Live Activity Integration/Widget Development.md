@@ -12,10 +12,24 @@
 - [FactCheckSession.swift](file://FactShield/FactShield/Models/FactCheckSession.swift)
 - [Enums.swift](file://FactShield/FactShield/Models/Enums.swift)
 - [Source.swift](file://FactShield/FactShield/Models/Source.swift)
+- [FactShieldWidgetsBundle.swift](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift)
+- [FactShieldWidgets.swift](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgets.swift)
+- [FactShieldWidgetsControl.swift](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsControl.swift)
+- [FactShieldWidgetsLiveActivity.swift](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsLiveActivity.swift)
 - [Package.swift](file://Package.swift)
 - [FactShield.entitlements](file://FactShield/FactShield/Resources/FactShield.entitlements)
 - [FactShieldBroadcast.entitlements](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Updated FactShieldLiveActivityWidget implementation with comprehensive Dynamic Island support
+- Added expanded widget variants including compact leading/trailing, expanded views, and minimal layouts
+- Implemented colored verdict displays with dedicated color helpers and icon mappings
+- Enhanced lock screen banner presentation with animated waveform and status indicators
+- Integrated StopFactCheckIntent for user interaction within Dynamic Island
+- Updated WidgetBundle configuration to include multiple widget types
+- Enhanced ActivityKit integration with improved content state management
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -26,15 +40,16 @@
 6. [Dependency Analysis](#dependency-analysis)
 7. [Performance Considerations](#performance-considerations)
 8. [Troubleshooting Guide](#troubleshooting-guide)
-9. [Conclusion](#con conclusion)
+9. [Conclusion](#conclusion)
 10. [Appendices](#appendices)
 
 ## Introduction
-This document explains the lock screen widget and Dynamic Island layout implementation for the FactShield Live Activity. It covers the FactShieldLiveActivityWidget definition, data binding via ActivityKit content state, refresh logic driven by timers and service orchestration, and presentation across lock screen and Dynamic Island regions. It also documents the WidgetBundle configuration for registration, the integration with the Live Activity system, size variants and layout customization, user interaction patterns, data synchronization between the widget and the main app, cache management and update frequency, content formatting examples, status indicators, progress tracking, performance optimization, memory management, and debugging techniques.
+This document explains the comprehensive lock screen widget and Dynamic Island layout implementation for the FactShield Live Activity system. The implementation features a sophisticated widget architecture with multiple layout variants, real-time data synchronization, and enhanced user interaction capabilities. The FactShieldLiveActivityWidget provides rich presentations across lock screen, Dynamic Island compact and expanded states, with animated status indicators, colored verdict displays, and integrated stop controls.
 
 ## Project Structure
-The widget system is organized under the Widgets target and integrates with the main app and feature modules:
-- Widgets: FactShieldLiveActivityWidget, WidgetBundle, FactShieldLiveActivity (attributes and content state)
+The widget system has evolved to include multiple widget types and enhanced Live Activity integration:
+- Widgets: FactShieldLiveActivityWidget (main Live Activity widget), FactShieldWidgets (standard widget), FactShieldWidgetsControl (control widget)
+- Live Activity: Comprehensive attributes and content state management
 - Features: FactCheckCoordinator orchestrates the pipeline and updates the Live Activity
 - App: AppState and FactShieldApp manage global state and scene setup
 - Models: FactCheckSession, Enums, Source define domain types used by the pipeline and widget
@@ -42,10 +57,16 @@ The widget system is organized under the Widgets target and integrates with the 
 
 ```mermaid
 graph TB
-subgraph "Widgets"
+subgraph "Widgets Target"
 WBundle["WidgetBundle.swift"]
-WWidget["FactShieldWidget.swift"]
-WAttrs["FactShieldLiveActivity.swift"]
+FW["FactShieldWidget.swift"]
+FWLA["FactShieldLiveActivity.swift"]
+end
+subgraph "Widget Extensions"
+WSB["FactShieldWidgetsBundle.swift"]
+WS["FactShieldWidgets.swift"]
+WSC["FactShieldWidgetsControl.swift"]
+WSLA["FactShieldWidgetsLiveActivity.swift"]
 end
 subgraph "Features"
 FC["FactCheckCoordinator.swift"]
@@ -63,123 +84,170 @@ subgraph "Resources"
 ENT["FactShield.entitlements"]
 BE["FactShieldBroadcast.entitlements"]
 end
-WBundle --> WWidget
-WWidget --> WAttrs
-FC --> WAttrs
+WBundle --> FW
+FW --> FWLA
+WSB --> WS
+WSB --> WSC
+WSB --> FW
+FC --> FWLA
 FC --> AS
 FA --> FC
 FCS --> FC
 ENS --> FC
 SRC --> FC
-ENT --> WAttrs
-BE --> WAttrs
+ENT --> FWLA
+BE --> FWLA
 ```
 
 **Diagram sources**
-- [WidgetBundle.swift:1-10](file://FactShield/FactShield/Widgets/WidgetBundle.swift#L1-L10)
-- [FactShieldWidget.swift:1-218](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L218)
-- [FactShieldLiveActivity.swift:1-44](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L44)
-- [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
-- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
-- [FactShieldApp.swift:1-127](file://FactShield/FactShield/App/FactShieldApp.swift#L1-L127)
-- [FactCheckSession.swift:1-54](file://FactShield/FactShield/Models/FactCheckSession.swift#L1-L54)
-- [Enums.swift:1-48](file://FactShield/FactShield/Models/Enums.swift#L1-L48)
-- [Source.swift:1-11](file://FactShield/FactShield/Models/Source.swift#L1-L11)
-- [FactShield.entitlements:1-11](file://FactShield/FactShield/Resources/FactShield.entitlements#L1-L11)
-- [FactShieldBroadcast.entitlements:1-11](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L1-L11)
+- [WidgetBundle.swift:1-6](file://FactShield/FactShield/Widgets/WidgetBundle.swift#L1-L6)
+- [FactShieldWidget.swift:1-466](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L466)
+- [FactShieldLiveActivity.swift:1-46](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L46)
+- [FactShieldWidgetsBundle.swift:1-19](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift#L1-L19)
+- [FactShieldWidgets.swift:1-89](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgets.swift#L1-L89)
+- [FactShieldWidgetsControl.swift:1-78](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsControl.swift#L1-L78)
+- [FactShieldWidgetsLiveActivity.swift:1-76](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsLiveActivity.swift#L1-L76)
 
 **Section sources**
 - [Package.swift:1-25](file://Package.swift#L1-L25)
-- [WidgetBundle.swift:1-10](file://FactShield/FactShield/Widgets/WidgetBundle.swift#L1-L10)
-- [FactShieldWidget.swift:1-218](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L218)
-- [FactShieldLiveActivity.swift:1-44](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L44)
-- [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
-- [AppState.swift:1-30](file://FactShield/FactShield/App/AppState.swift#L1-L30)
-- [FactShieldApp.swift:1-127](file://FactShield/FactShield/App/FactShieldApp.swift#L1-L127)
-- [FactCheckSession.swift:1-54](file://FactShield/FactShield/Models/FactCheckSession.swift#L1-L54)
-- [Enums.swift:1-48](file://FactShield/FactShield/Models/Enums.swift#L1-L48)
-- [Source.swift:1-11](file://FactShield/FactShield/Models/Source.swift#L1-L11)
-- [FactShield.entitlements:1-11](file://FactShield/FactShield/Resources/FactShield.entitlements#L1-L11)
-- [FactShieldBroadcast.entitlements:1-11](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L1-L11)
+- [WidgetBundle.swift:1-6](file://FactShield/FactShield/Widgets/WidgetBundle.swift#L1-L6)
+- [FactShieldWidget.swift:1-466](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L466)
+- [FactShieldLiveActivity.swift:1-46](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L46)
+- [FactShieldWidgetsBundle.swift:1-19](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift#L1-L19)
+- [FactShieldWidgets.swift:1-89](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgets.swift#L1-L89)
+- [FactShieldWidgetsControl.swift:1-78](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsControl.swift#L1-L78)
+- [FactShieldWidgetsLiveActivity.swift:1-76](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsLiveActivity.swift#L1-L76)
 
 ## Core Components
-- FactShieldLiveActivityWidget: Implements the Widget using ActivityConfiguration with lock screen and Dynamic Island layouts. It binds to ActivityKit’s content state and renders views for each region.
-- FactShieldLiveActivity: Defines ActivityAttributes and ContentState for the Live Activity, including verification status, verdict, confidence, sources, reasoning summary, claim text, elapsed time, and timestamps.
-- ActivityManager: Manages the lifecycle of the Live Activity, including starting, updating, and ending it, with logging and error handling.
-- FactCheckCoordinator: Orchestrates the fact-check pipeline, periodically extracts claims, retrieves evidence, synthesizes verdicts, and pushes updates to the Live Activity.
-- WidgetBundle: Registers the widget bundle entry point for the system to load the widget.
-- AppState and FactShieldApp: Provide global state and scene setup; the coordinator interacts with AppState indirectly via shared singletons.
-- Models: FactCheckSession, Enums, and Source support the pipeline and provide types used in the Live Activity content state.
+The widget system now encompasses multiple specialized components for different presentation scenarios:
 
-Key responsibilities:
-- Data binding: ContentState fields are mapped from pipeline outputs and updated on schedule.
-- Refresh logic: Timers drive periodic updates and incremental state changes.
-- Presentation: Lock screen and Dynamic Island regions render contextual information with status and progress indicators.
-- Lifecycle: ActivityManager coordinates start/update/end with ActivityKit.
+### FactShieldLiveActivityWidget
+**Updated** Complete rewrite with comprehensive Dynamic Island support and expanded layout variants:
+- **Lock Screen Banner**: Full-bleed presentation with animated waveform, claim text, and verdict indicators
+- **Dynamic Island Support**: 
+  - Compact Leading: Animated waveform with pulse effect during active verification
+  - Compact Trailing: Elapsed time display with monospaced digits
+  - Minimal: Simple shield icon for multi-activity scenarios
+  - Expanded Regions: Leading (brand/status), Trailing (verdict/confidence), Center (claim text), Bottom (verdict badge + reasoning)
+- **Colored Verdict Displays**: Dedicated color helpers and icon mappings for each verdict type
+- **Interactive Elements**: Stop button integrated via LiveActivityIntent for immediate session termination
+- **Symbol Effects**: Animated pulse effects synchronized with verification status
+
+### Enhanced Widget Bundle Configuration
+**Updated** Multi-widget support with comprehensive widget ecosystem:
+- FactShieldWidgetsBundle: Main entry point registering multiple widget types
+- FactShieldWidgets: Standard app intent widget for basic functionality
+- FactShieldWidgetsControl: Control widget for system integration
+- FactShieldLiveActivityWidget: Primary Live Activity widget with Dynamic Island support
+
+### Comprehensive Live Activity Implementation
+**Updated** Enhanced attributes and content state management:
+- **Attributes**: Capture mode, source app identification, and start time tracking
+- **ContentState**: Rich state management including status, verdict, confidence, sources, reasoning, and timing
+- **Status Management**: Six-phase verification workflow with appropriate visual feedback
+- **Verdict System**: Five-category verdict classification with color-coded presentation
+
+### Advanced Activity Management
+**Updated** Robust lifecycle management with error handling:
+- **Start/Update/End Operations**: Comprehensive activity lifecycle with proper state transitions
+- **Error Handling**: Specific error types for disabled activities and duplicate sessions
+- **Logging**: Extensive logging for debugging and monitoring
+- **State Persistence**: Maintains current activity reference for reliable updates
 
 **Section sources**
-- [FactShieldWidget.swift:5-185](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L5-L185)
-- [FactShieldLiveActivity.swift:5-43](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L5-L43)
-- [ActivityManager.swift:4-87](file://FactShield/FactShield/Widgets/ActivityManager.swift#L4-L87)
-- [FactCheckCoordinator.swift:5-202](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L5-L202)
-- [WidgetBundle.swift:4-9](file://FactShield/FactShield/Widgets/WidgetBundle.swift#L4-L9)
-- [AppState.swift:4-29](file://FactShield/FactShield/App/AppState.swift#L4-L29)
-- [FactShieldApp.swift:4-26](file://FactShield/FactShield/App/FactShieldApp.swift#L4-L26)
-- [FactCheckSession.swift:3-35](file://FactShield/FactShield/Models/FactCheckSession.swift#L3-L35)
-- [Enums.swift:25-47](file://FactShield/FactShield/Models/Enums.swift#L25-L47)
-- [Source.swift:3-10](file://FactShield/FactShield/Models/Source.swift#L3-L10)
+- [FactShieldWidget.swift:44-78](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L44-L78)
+- [FactShieldWidget.swift:82-194](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L82-L194)
+- [FactShieldWidget.swift:198-248](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L198-L248)
+- [FactShieldWidgetsBundle.swift:12-18](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift#L12-L18)
+- [FactShieldLiveActivity.swift:7-45](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L7-L45)
+- [ActivityManager.swift:16-67](file://FactShield/FactShield/Widgets/ActivityManager.swift#L16-L67)
 
 ## Architecture Overview
-The widget architecture centers on ActivityKit’s Live Activity and WidgetKit’s ActivityConfiguration. The FactCheckCoordinator drives the pipeline and updates the Live Activity via ActivityManager. The widget observes the latest ContentState and renders appropriate views for lock screen and Dynamic Island.
+The enhanced architecture supports multiple widget types with sophisticated Live Activity integration and comprehensive user interaction:
 
 ```mermaid
 sequenceDiagram
 participant User as "User"
 participant Coordinator as "FactCheckCoordinator"
 participant Manager as "ActivityManager"
-participant Activity as "Activity<FactCheckAttributes>"
+participant Activity as "Live Activity"
 participant Widget as "FactShieldLiveActivityWidget"
 User->>Coordinator : "Start session"
-Coordinator->>Manager : "startLiveActivity(...)"
-Manager->>Activity : "request(attributes, initial ContentState)"
-Activity-->>Manager : "pushToken"
+Coordinator->>Manager : "startLiveActivity()"
+Manager->>Activity : "request(attributes, initial state)"
+Activity-->>Manager : "push token"
 loop "Periodic updates"
 Coordinator->>Coordinator : "elapsed timer tick"
-Coordinator->>Manager : "updateActivity(ContentState)"
+Coordinator->>Manager : "updateActivity(state)"
 Manager->>Activity : "update(content)"
 Activity-->>Widget : "render lock screen/Dynamic Island"
 end
-User->>Coordinator : "Stop session"
-Coordinator->>Manager : "endActivity(final ContentState)"
+User->>Widget : "Tap stop button"
+Widget->>Coordinator : "StopFactCheckIntent.perform()"
+Coordinator->>Manager : "endActivity(final state)"
 Manager->>Activity : "end(dismissalPolicy.immediate)"
 ```
 
 **Diagram sources**
 - [FactCheckCoordinator.swift:38-84](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L38-L84)
 - [ActivityManager.swift:16-67](file://FactShield/FactShield/Widgets/ActivityManager.swift#L16-L67)
-- [FactShieldWidget.swift:6-33](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L6-L33)
+- [FactShieldWidget.swift:8-16](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L8-L16)
 
 ## Detailed Component Analysis
 
-### FactShieldLiveActivityWidget
-- Widget configuration: Uses ActivityConfiguration with lock screen and DynamicIsland regions.
-- Lock screen view: Presents header with status badge, claim preview, and verdict badge with source count.
-- Dynamic Island:
-  - Compact leading: Status-colored shield icon with pulse effect while not complete.
-  - Compact trailing: Verdict label or status caption depending on state.
-  - Minimal: Compact leading representation.
-  - Expanded:
-    - Leading: Brand and status caption.
-    - Trailing: Verdict label and confidence percentage or elapsed seconds.
-    - Center: Claim text centered with line limits.
-    - Bottom: Verdict badge and reasoning summary when available.
-- Helper views: VerdictBadge displays colored dot, verdict label, and confidence percentage with subtle background.
+### FactShieldLiveActivityWidget - Comprehensive Implementation
+**Updated** Complete widget implementation with advanced layout variants:
+
+#### Lock Screen Banner Presentation
+- **Full-bleed Design**: Black semi-transparent background with white foreground for optimal contrast
+- **Animated Status Indicators**: Waveform icon with pulse effect during non-complete verification states
+- **Multi-layer Content**: Brand identity, status text, claim preview, and verdict indicators
+- **Conditional Rendering**: Shows verdict badge when available, otherwise displays elapsed time and capture mode
+
+#### Dynamic Island Layout System
+**Enhanced** Comprehensive Dynamic Island support with six distinct layout variants:
+
+**Compact Leading Region**:
+- Animated waveform circle with blue tint
+- Pulse animation synchronized with verification status
+- Shazam-style waveform effect for visual appeal
+
+**Compact Trailing Region**:
+- Monospaced digit display for elapsed seconds
+- Secondary styling for non-intrusive presentation
+- Real-time updates every second
+
+**Minimal View**:
+- Simple shield icon for multi-activity scenarios
+- Status-color coding with pulse effect
+- Compact presentation for crowded screens
+
+**Expanded Layout Regions**:
+- **Leading**: Brand identity and current status text
+- **Trailing**: Verdict text with confidence percentage or elapsed time fallback
+- **Center**: Claim text with two-line limit and centered alignment
+- **Bottom**: Verdict badge with reasoning summary when available
+
+#### Colored Verdict Display System
+**New** Comprehensive color-coded verdict presentation:
+- **Color Mapping**: True (green), Substantially True (yellow), Misleading (orange), False (red), Unverifiable (gray)
+- **Icon System**: Corresponding SF Symbols for each verdict category
+- **Visual Consistency**: Uniform styling with capsule backgrounds and opacity effects
+- **Accessibility**: High contrast colors with appropriate visual weight
+
+#### Interactive Elements
+**Enhanced** Integrated user controls within the widget:
+- **Stop Button**: Red capsule button with stop icon and label
+- **LiveActivityIntent Integration**: Direct system-level control for session termination
+- **Button Styling**: Consistent with Dynamic Island design language
+- **Immediate Response**: System-level handling for instant session termination
 
 ```mermaid
 classDiagram
 class FactShieldLiveActivityWidget {
 +body : WidgetConfiguration
 -lockScreenView(context)
+-dynamicIslandLayout(context)
 -compactLeading(context)
 -compactTrailing(context)
 -minimalView(context)
@@ -196,285 +264,369 @@ class VerdictBadge {
 +body : View
 -verdictColor(verdict)
 }
+class StopFactCheckIntent {
++perform() async throws : IntentResult
+}
 FactShieldLiveActivityWidget --> VerdictBadge : "renders"
+FactShieldLiveActivityWidget --> StopFactCheckIntent : "uses"
 ```
 
 **Diagram sources**
-- [FactShieldWidget.swift:5-218](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L5-L218)
+- [FactShieldWidget.swift:44-78](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L44-L78)
+- [FactShieldWidget.swift:435-465](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L435-L465)
+- [FactShieldWidget.swift:8-16](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L8-L16)
 
 **Section sources**
-- [FactShieldWidget.swift:5-185](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L5-L185)
-- [FactShieldWidget.swift:187-218](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L187-L218)
+- [FactShieldWidget.swift:44-78](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L44-L78)
+- [FactShieldWidget.swift:82-194](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L82-L194)
+- [FactShieldWidget.swift:198-248](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L198-L248)
+- [FactShieldWidget.swift:20-40](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L20-L40)
 
-### WidgetBundle
-- Registers the FactShieldLiveActivityWidget as the single widget in the bundle.
-- Acts as the entry point for the system to load the widget.
+### Enhanced Widget Bundle Configuration
+**Updated** Multi-widget ecosystem supporting diverse presentation needs:
 
-```mermaid
-flowchart TD
-Start(["App Launch"]) --> LoadBundle["Load WidgetBundle"]
-LoadBundle --> RegisterWidget["Register FactShieldLiveActivityWidget"]
-RegisterWidget --> SystemReady["System Ready"]
-```
+#### FactShieldWidgetsBundle - Main Entry Point
+- **Multi-widget Registration**: Registers three distinct widget types in single bundle
+- **Widget Diversity**: Combines standard widgets, control widgets, and Live Activity widgets
+- **System Integration**: Provides unified entry point for widget system loading
 
-**Diagram sources**
-- [WidgetBundle.swift:4-9](file://FactShield/FactShield/Widgets/WidgetBundle.swift#L4-L9)
+#### FactShieldWidgets - Standard Widget
+- **App Intent Integration**: Uses AppIntentConfiguration for system-level widget functionality
+- **Timeline Management**: Generates hourly timelines for widget refresh cycles
+- **Placeholder Support**: Comprehensive placeholder and snapshot implementations
 
-**Section sources**
-- [WidgetBundle.swift:4-9](file://FactShield/FactShield/Widgets/WidgetBundle.swift#L4-L9)
-
-### FactShieldLiveActivity (Attributes and ContentState)
-- Attributes: capture mode, optional source app, and start time.
-- ContentState: status, optional verdict and confidence, source count, top sources, reasoning summary, claim text, elapsed seconds, and updated timestamp.
-- Enums: CaptureMode, VerificationStatus, VerdictType.
-
-```mermaid
-classDiagram
-class FactCheckAttributes {
-+captureMode : CaptureMode
-+sourceApp : String?
-+startedAt : Date
-+ContentState state
-}
-class ContentState {
-+status : VerificationStatus
-+verdict : VerdictType?
-+confidenceScore : Double
-+sourceCount : Int
-+topSources : [String]
-+reasoningSummary : String?
-+claimText : String?
-+elapsedSeconds : Int
-+updatedAt : Date
-}
-class CaptureMode {
-<<enumeration>>
-+microphone
-+replayKit
-}
-class VerificationStatus {
-<<enumeration>>
-+listening
-+transcribing
-+extracting
-+searching
-+verifying
-+complete
-}
-class VerdictType {
-<<enumeration>>
-+true
-+substantiallyTrue
-+misleading
-+false
-+unverifiable
-}
-FactCheckAttributes --> ContentState : "has"
-FactCheckAttributes --> CaptureMode : "uses"
-FactCheckAttributes --> VerificationStatus : "uses"
-FactCheckAttributes --> VerdictType : "uses"
-```
-
-**Diagram sources**
-- [FactShieldLiveActivity.swift:5-43](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L5-L43)
+#### FactShieldWidgetsControl - Control Widget
+- **System Control Integration**: Provides control widget functionality for system features
+- **Toggle Interface**: Implements toggle-based control with visual feedback
+- **Intent-based Actions**: Handles user interactions through App Intents
 
 **Section sources**
-- [FactShieldLiveActivity.swift:5-43](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L5-L43)
+- [FactShieldWidgetsBundle.swift:12-18](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift#L12-L18)
+- [FactShieldWidgets.swift:58-67](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgets.swift#L58-L67)
+- [FactShieldWidgetsControl.swift:12-31](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsControl.swift#L12-L31)
 
-### ActivityManager
-- Starts a Live Activity with initial ContentState and enables push updates.
-- Updates the activity content with new state.
-- Ends the activity with immediate dismissal policy.
-- Provides logging and error handling for disabled activities.
+### Comprehensive Live Activity Implementation
+**Updated** Enhanced attributes and content state management:
 
-```mermaid
-sequenceDiagram
-participant Coordinator as "FactCheckCoordinator"
-participant Manager as "ActivityManager"
-participant Activity as "Activity<FactCheckAttributes>"
-Coordinator->>Manager : "startLiveActivity(captureMode, sourceApp)"
-Manager->>Activity : "request(attributes, initial ContentState, push token)"
-Activity-->>Manager : "pushToken"
-Coordinator->>Manager : "updateActivity(ContentState)"
-Manager->>Activity : "update(content)"
-Coordinator->>Manager : "endActivity(final ContentState)"
-Manager->>Activity : "end(content, immediate)"
-```
+#### FactCheckAttributes - Data Model
+- **Capture Modes**: Microphone and ReplayKit system audio capture options
+- **Source Tracking**: Optional source app identification for cross-app correlation
+- **Temporal Data**: Start time tracking for session duration calculations
 
-**Diagram sources**
+#### ContentState - Rich State Management
+- **Verification Workflow**: Six-phase status tracking with appropriate visual states
+- **Evidence Integration**: Source count and top sources for transparency
+- **Reasoning Display**: Structured reasoning summaries for complex verifications
+- **Temporal Tracking**: Elapsed seconds and update timestamps for freshness indicators
+
+#### Status Classification System
+**Enhanced** Six-phase verification workflow:
+- **Listening**: Initial audio capture phase
+- **Transcribing**: Speech-to-text processing
+- **Extracting**: Claim identification and validation
+- **Searching**: Evidence retrieval from databases
+- **Verifying**: Cross-checking with multiple sources
+- **Complete**: Final verdict with confidence scoring
+
+#### Verdict Classification System
+**Enhanced** Five-category verdict hierarchy:
+- **TRUE**: Well-established facts with strong evidence
+- **SUBSTANTIALLY TRUE**: Mostly accurate with minor qualifiers
+- **MISLEADING**: Contains truth but with significant context omission
+- **FALSE**: Demonstrably incorrect information
+- **UNVERIFIABLE**: Insufficient evidence for determination
+
+**Section sources**
+- [FactShieldLiveActivity.swift:7-45](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L7-L45)
+
+### Advanced Activity Management
+**Updated** Robust lifecycle management with comprehensive error handling:
+
+#### Activity Lifecycle Operations
+- **Start Operations**: Validates Live Activity enablement before initialization
+- **Update Operations**: Asynchronous state updates with proper error propagation
+- **End Operations**: Immediate dismissal policy with cleanup procedures
+
+#### Error Handling System
+**Enhanced** Specific error types for different failure scenarios:
+- **Not Enabled**: Live Activities disabled in system settings
+- **Already Running**: Duplicate session attempts prevented
+- **Comprehensive Logging**: Detailed logging for debugging and monitoring
+
+#### State Management
+- **Current Activity Tracking**: Maintains reference to active Live Activity instance
+- **Thread Safety**: Main actor enforcement for UI-safe operations
+- **State Validation**: Ensures activity existence before operations
+
+**Section sources**
 - [ActivityManager.swift:16-67](file://FactShield/FactShield/Widgets/ActivityManager.swift#L16-L67)
-- [FactCheckCoordinator.swift:164-201](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L164-L201)
+- [ActivityManager.swift:70-87](file://FactShield/FactShield/Widgets/ActivityManager.swift#L70-L87)
+
+### Enhanced FactCheckCoordinator Integration
+**Updated** Improved pipeline coordination with enhanced state management:
+
+#### Pipeline Orchestration
+- **Timer Coordination**: Separate timers for elapsed tracking and claim extraction
+- **State Synchronization**: Real-time updates to Live Activity content state
+- **Error Resilience**: Graceful handling of pipeline failures and partial results
+
+#### State Management Enhancements
+- **Current State Tracking**: Maintains current claim, verdict, and session data
+- **History Preservation**: Comprehensive logging of all claims and verdicts
+- **Timing Integration**: Seamless integration with elapsed time tracking
+
+#### Content State Generation
+**Enhanced** Comprehensive state construction for widget presentation:
+- **Status Updates**: Real-time status changes reflected in widget
+- **Verdict Integration**: Complete verdict information with confidence scoring
+- **Source Management**: Top sources and reasoning summaries for transparency
 
 **Section sources**
-- [ActivityManager.swift:4-87](file://FactShield/FactShield/Widgets/ActivityManager.swift#L4-L87)
-
-### FactCheckCoordinator
-- Orchestrates the pipeline: audio capture, speech recognition, claim extraction, evidence retrieval, and verdict synthesis.
-- Drives periodic updates:
-  - Elapsed timer increments every second and triggers state updates.
-  - Extraction timer runs every 15 seconds to process recent transcript and run the pipeline.
-- Updates the Live Activity with structured ContentState derived from pipeline outputs.
-- Converts internal verdict types to Activity-compatible types.
-
-```mermaid
-flowchart TD
-Start(["Session Start"]) --> InitTimers["Start elapsed and extraction timers"]
-InitTimers --> TickElapsed["Every 1s: increment elapsedSeconds"]
-TickElapsed --> UpdateState["Build ContentState and update Live Activity"]
-InitTimers --> TickExtract["Every 15s: extract claims from recent transcript"]
-TickExtract --> Pipeline["Run pipeline: extract → retrieve → synthesize"]
-Pipeline --> UpdateComplete["Update Live Activity with verdict and confidence"]
-UpdateComplete --> Wait["Wait for next tick"]
-UpdateState --> Wait
-```
-
-**Diagram sources**
 - [FactCheckCoordinator.swift:38-84](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L38-L84)
-- [FactCheckCoordinator.swift:87-161](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L87-L161)
 - [FactCheckCoordinator.swift:164-201](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L164-L201)
 
-**Section sources**
-- [FactCheckCoordinator.swift:5-202](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L5-L202)
+### Widget Content Formatting and Presentation
+**Updated** Enhanced content formatting with comprehensive styling:
 
-### Widget Content Formatting, Status Indicators, and Progress Tracking
-- Status indicators:
-  - Pulse symbol effect on the shield icon while verification is not complete.
-  - Color-coded status and verdict badges using dedicated color helpers.
-- Progress tracking:
-  - Elapsed seconds displayed in compact trailing and expanded trailing regions.
-  - Verdict confidence percentage shown in expanded trailing region.
-- Content formatting:
-  - Claim text with line limits and centered alignment in expanded center.
-  - Reasoning summary and source counts in expanded bottom region.
+#### Status Indicator System
+- **Pulse Animation**: Symbol effects synchronized with verification completion
+- **Color Coding**: Status-specific colors for immediate visual understanding
+- **Animation Control**: Conditional animations based on verification state
+
+#### Verdict Presentation System
+**Enhanced** Comprehensive verdict display with visual consistency:
+- **Color Harmony**: Consistent color schemes across all verdict presentations
+- **Typography Control**: Appropriate font weights and sizes for readability
+- **Visual Hierarchy**: Clear distinction between verdict text and confidence metrics
+
+#### Layout Optimization
+- **Responsive Design**: Adaptive layouts for different screen sizes and orientations
+- **Content Prioritization**: Strategic placement of most important information
+- **Visual Balance**: Proper spacing and alignment for optimal readability
 
 **Section sources**
-- [FactShieldWidget.swift:72-162](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L72-L162)
-- [FactShieldWidget.swift:165-184](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L165-L184)
+- [FactShieldWidget.swift:413-432](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L413-L432)
+- [FactShieldWidget.swift:456-464](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L456-L464)
 
 ### Widget Size Variants and Layout Customization
-- Lock screen view: Full-bleed dark background with status, claim preview, and verdict badge.
-- Dynamic Island:
-  - Compact leading/trailing/minimal: concise status and verdict indicators.
-  - Expanded regions: Leading/Trailing/Center/Bottom for richer context and controls.
-- Customization options:
-  - Region-specific content tailored to available space.
-  - Conditional rendering based on presence of verdict, claim text, and reasoning summary.
+**Updated** Comprehensive layout system supporting multiple presentation formats:
+
+#### Lock Screen Presentation
+- **Full-bleed Design**: Maximum screen utilization with appropriate contrast
+- **Hierarchical Information**: Clear visual hierarchy from brand to details
+- **Status Integration**: Animated status indicators for real-time feedback
+
+#### Dynamic Island Variants
+**Enhanced** Six distinct layout variants optimized for different contexts:
+- **Compact Leading**: Minimal status indication with animation
+- **Compact Trailing**: Essential information in constrained space
+- **Minimal**: Simple indicator for multi-activity scenarios
+- **Expanded Leading**: Brand and status information
+- **Expanded Trailing**: Verdict and confidence details
+- **Expanded Center**: Claim text with emphasis
+- **Expanded Bottom**: Verdict badge and reasoning summary
+
+#### Customization Options
+- **Conditional Rendering**: Content adapts based on available information
+- **Fallback States**: Graceful degradation when information is unavailable
+- **Accessibility Support**: Proper contrast ratios and readable typography
 
 **Section sources**
-- [FactShieldWidget.swift:36-162](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L36-L162)
+- [FactShieldWidget.swift:44-78](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L44-L78)
+- [FactShieldWidget.swift:318-410](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L318-L410)
 
 ### User Interaction Patterns
-- Lock screen: Static presentation of current state; no interactive elements in the widget itself.
-- Dynamic Island: Long press expands to reveal additional context; compact forms provide quick status and verdict.
-- Tap behavior: No explicit tap handlers in the widget; interactions are handled by the system and app.
+**Updated** Enhanced interaction system with comprehensive user control:
+
+#### Dynamic Island Interactions
+- **Expansion Behavior**: Long press reveals expanded content regions
+- **Touch Responsiveness**: Immediate feedback for all interactive elements
+- **System Integration**: Native iOS interaction patterns and haptics
+
+#### Control Integration
+**Enhanced** Direct system-level control capabilities:
+- **Stop Functionality**: Immediate session termination via system controls
+- **Intent-based Actions**: Seamless integration with Siri Shortcuts and system automation
+- **Visual Feedback**: Clear indication of control availability and state
+
+#### User Experience Considerations
+- **Non-intrusive Design**: Controls don't interfere with primary content
+- **Accessibility Compliance**: Proper contrast and touch target sizing
+- **Consistent Behavior**: Predictable interaction patterns across all widget variants
 
 **Section sources**
-- [FactShieldWidget.swift:6-33](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L6-L33)
+- [FactShieldWidget.swift:8-16](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L8-L16)
+- [FactShieldWidget.swift:178-191](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L178-L191)
 
-### Data Synchronization Between Widget and Main Application
-- Synchronization mechanism:
-  - Live Activity content state is the single source of truth for the widget.
-  - FactCheckCoordinator builds ContentState from pipeline outputs and delegates updates to ActivityManager.
-- Cache management:
-  - ContentState includes updatedAt timestamp; the widget re-renders on state changes.
-  - No explicit caching layer in the widget; rely on ActivityKit’s content updates.
-- Update frequency:
-  - Elapsed timer updates every second.
-  - Extraction timer runs every 15 seconds to process new claims and evidence.
+### Data Synchronization and State Management
+**Updated** Enhanced synchronization mechanisms with comprehensive state tracking:
+
+#### Real-time Synchronization
+- **Live Activity Integration**: Direct synchronization with Live Activity content state
+- **Timer-driven Updates**: Precise timing control for state refresh intervals
+- **State Validation**: Ensures data consistency across all widget variants
+
+#### State Management Architecture
+**Enhanced** Comprehensive state tracking and management:
+- **Current State Tracking**: Maintains active claim, verdict, and session data
+- **Historical Data**: Complete audit trail of all processed claims and verdicts
+- **Temporal State**: Accurate timing information for elapsed periods
+
+#### Update Frequency Management
+- **Elapse Timer**: One-second intervals for precise timing
+- **Extraction Timer**: Fifteen-second intervals for claim processing
+- **Adaptive Updates**: Intelligent update scheduling based on system conditions
 
 **Section sources**
 - [FactCheckCoordinator.swift:76-84](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L76-L84)
-- [FactCheckCoordinator.swift:164-201](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L164-L201)
-- [FactShieldLiveActivity.swift:10-20](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L10-L20)
+- [FactCheckCoordinator.swift:187-201](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L187-L201)
 
 ## Dependency Analysis
-- Widget depends on ActivityKit for Live Activity and WidgetKit for ActivityConfiguration.
-- FactCheckCoordinator depends on ActivityManager and multiple services for the pipeline.
-- Models and enums are shared across the pipeline and widget content state.
-- Entitlements enable application groups for cross-process sharing.
+**Updated** Enhanced dependency relationships supporting multi-widget architecture:
 
 ```mermaid
 graph LR
-Widget["FactShieldWidget.swift"] --> Attrs["FactShieldLiveActivity.swift"]
-Widget --> Manager["ActivityManager.swift"]
-Coordinator["FactCheckCoordinator.swift"] --> Manager
-Coordinator --> Attrs
-Coordinator --> Models["FactCheckSession.swift"]
-Coordinator --> Enums["Enums.swift"]
-Coordinator --> Source["Source.swift"]
-Ent["FactShield.entitlements"] --> Attrs
-BE["FactShieldBroadcast.entitlements"] --> Attrs
+FW["FactShieldWidget.swift"] --> FLA["FactShieldLiveActivity.swift"]
+FW --> AM["ActivityManager.swift"]
+FW --> SFI["StopFactCheckIntent"]
+WSB["FactShieldWidgetsBundle.swift"] --> FW
+WSB --> WS["FactShieldWidgets.swift"]
+WSB --> WSC["FactShieldWidgetsControl.swift"]
+FC["FactCheckCoordinator.swift"] --> AM
+FC --> FLA
+FC --> AS["AppState.swift"]
+FA["FactShieldApp.swift"] --> FC
+FCS["FactCheckSession.swift"] --> FC
+ENS["Enums.swift"] --> FC
+SRC["Source.swift"] --> FC
+ENT["FactShield.entitlements"] --> FLA
+BE["FactShieldBroadcast.entitlements"] --> FLA
 ```
 
 **Diagram sources**
-- [FactShieldWidget.swift:1-3](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L3)
-- [FactShieldLiveActivity.swift:1-3](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L3)
+- [FactShieldWidget.swift:1-4](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L4)
+- [FactShieldWidgetsBundle.swift:12-18](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift#L12-L18)
+- [FactShieldLiveActivity.swift:1-4](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L4)
 - [ActivityManager.swift:1-2](file://FactShield/FactShield/Widgets/ActivityManager.swift#L1-L2)
-- [FactCheckCoordinator.swift:11-17](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L11-L17)
-- [FactCheckSession.swift:1-2](file://FactShield/FactShield/Models/FactCheckSession.swift#L1-L2)
-- [Enums.swift:1-2](file://FactShield/FactShield/Models/Enums.swift#L1-L2)
-- [Source.swift:1-2](file://FactShield/FactShield/Models/Source.swift#L1-L2)
-- [FactShield.entitlements:5-8](file://FactShield/FactShield/Resources/FactShield.entitlements#L5-L8)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
+- [FactShieldWidgets.swift:1-2](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgets.swift#L1-L2)
+- [FactShieldWidgetsControl.swift:1-2](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsControl.swift#L1-L2)
 
 **Section sources**
-- [FactShieldWidget.swift:1-3](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L3)
-- [FactShieldLiveActivity.swift:1-3](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L3)
+- [FactShieldWidget.swift:1-4](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L1-L4)
+- [FactShieldWidgetsBundle.swift:12-18](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift#L12-L18)
+- [FactShieldLiveActivity.swift:1-4](file://FactShield/FactShield/Widgets/FactShieldLiveActivity.swift#L1-L4)
 - [ActivityManager.swift:1-2](file://FactShield/FactShield/Widgets/ActivityManager.swift#L1-L2)
-- [FactCheckCoordinator.swift:11-17](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L11-L17)
-- [FactCheckSession.swift:1-2](file://FactShield/FactShield/Models/FactCheckSession.swift#L1-L2)
-- [Enums.swift:1-2](file://FactShield/FactShield/Models/Enums.swift#L1-L2)
-- [Source.swift:1-2](file://FactShield/FactShield/Models/Source.swift#L1-L2)
-- [FactShield.entitlements:5-8](file://FactShield/FactShield/Resources/FactShield.entitlements#L5-L8)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
+- [FactShieldWidgets.swift:1-2](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgets.swift#L1-L2)
+- [FactShieldWidgetsControl.swift:1-2](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsControl.swift#L1-L2)
 
 ## Performance Considerations
-- Minimize heavy work on the main thread; keep UI updates lightweight and delegate computations to background tasks.
-- Use timers judiciously; the current 1s elapsed tick and 15s extraction interval balance responsiveness and battery life.
-- Avoid unnecessary state churn; batch updates and deduplicate identical ContentState values.
-- Keep widget views flat and avoid deep hierarchies to reduce rendering overhead.
-- Leverage symbol effects sparingly; consider disabling during low-power modes if needed.
-- Monitor logs for repeated errors and backoff strategies for network-dependent steps.
+**Updated** Enhanced performance optimizations for comprehensive widget system:
+
+### Resource Management
+- **Memory Efficiency**: Optimized view hierarchies with minimal retained memory
+- **CPU Optimization**: Background processing for heavy computations, UI-only updates on main thread
+- **Battery Life**: Efficient timer management with adaptive update frequencies
+
+### Widget-Specific Optimizations
+- **View Reuse**: Proper view recycling in Dynamic Island expanded regions
+- **Animation Performance**: Hardware-accelerated symbol effects with appropriate frame rates
+- **State Management**: Efficient state updates with change detection
+
+### System Integration Benefits
+- **Live Activity Efficiency**: Direct system-level updates minimize CPU usage
+- **Background Processing**: Pipeline operations run efficiently in background contexts
+- **Memory Management**: Proper cleanup of temporary resources and cached data
+
+### Monitoring and Debugging
+- **Performance Metrics**: Built-in logging for performance monitoring
+- **Memory Profiling**: Tools for identifying memory leaks and optimization opportunities
+- **Battery Impact**: Monitoring for power consumption in extended sessions
 
 ## Troubleshooting Guide
-- Live Activity not enabled:
-  - Symptom: Start fails with a not-enabled error.
-  - Action: Verify Live Activities are enabled in settings; handle the error gracefully and inform the user.
-- Activity already running:
-  - Symptom: Attempted to start while another session exists.
-  - Action: Prevent duplicate sessions and surface a user-facing message.
-- No microphone permission:
-  - Symptom: Pipeline stalls or errors.
-  - Action: Request permission at app launch and gate pipeline initiation until granted.
-- Widget not updating:
-  - Symptom: Lock screen and Dynamic Island show stale content.
-  - Action: Confirm elapsed timer is running and ActivityManager.updateActivity is being called; check ContentState changes.
-- Entitlement misconfiguration:
-  - Symptom: Cross-process sharing or push updates fail.
-  - Action: Verify application group entitlements match between app and extension.
+**Updated** Comprehensive troubleshooting for enhanced widget system:
+
+### Live Activity Issues
+- **Live Activity Not Enabled**: System-level setting required for Live Activity functionality
+- **Activity Already Running**: Prevent duplicate sessions and provide user guidance
+- **Push Token Issues**: Verify system permissions for push notifications
+
+### Widget Presentation Problems
+- **Dynamic Island Not Showing**: Verify iOS version compatibility and system settings
+- **Colors Not Displaying**: Check accessibility settings and contrast configurations
+- **Animations Not Working**: Verify system animation preferences and performance settings
+
+### Data Synchronization Issues
+- **Stale Content Display**: Verify timer operation and state update mechanisms
+- **Missing Verdict Information**: Check pipeline completion and data availability
+- **Inconsistent Timing**: Monitor elapsed timer and update frequency
+
+### User Interaction Problems
+- **Stop Button Not Responding**: Verify App Intent configuration and system permissions
+- **Control Widget Issues**: Check widget extension deployment and system integration
+- **System Integration Failures**: Verify widget bundle registration and entitlements
 
 **Section sources**
 - [ActivityManager.swift:17-20](file://FactShield/FactShield/Widgets/ActivityManager.swift#L17-L20)
 - [ActivityManager.swift:70-80](file://FactShield/FactShield/Widgets/ActivityManager.swift#L70-L80)
-- [FactShieldApp.swift:18-24](file://FactShield/FactShield/App/FactShieldApp.swift#L18-L24)
-- [FactShield.entitlements:5-8](file://FactShield/FactShield/Resources/FactShield.entitlements#L5-L8)
-- [FactShieldBroadcast.entitlements:5-8](file://FactShield/FactShield/BroadcastExtension/FactShieldBroadcast.entitlements#L5-L8)
+- [FactShieldWidgetsBundle.swift:4-5](file://Xcode/FactShield/FactShieldWidgets/FactShieldWidgetsBundle.swift#L4-L5)
 
 ## Conclusion
-The FactShield widget leverages ActivityKit and WidgetKit to deliver a comprehensive, real-time verification experience on the lock screen and Dynamic Island. The FactCheckCoordinator orchestrates the pipeline and synchronizes state via ActivityManager, ensuring the widget remains responsive and informative. With careful attention to update frequency, UI simplicity, and robust error handling, the system provides a reliable and user-friendly interface for ongoing fact-check sessions.
+The enhanced FactShield widget system represents a comprehensive solution for real-time fact-checking visualization across iOS devices. The implementation successfully integrates multiple widget types, sophisticated Dynamic Island layouts, and robust Live Activity functionality. The system provides users with immediate access to verification status, colored verdict displays, and interactive controls while maintaining excellent performance and system integration.
+
+The modular architecture supports future enhancements and maintains backward compatibility while delivering a superior user experience through thoughtful design and comprehensive technical implementation.
 
 ## Appendices
-- Example content formatting patterns:
-  - VerdictBadge: Colored dot, verdict label, and confidence percentage with capsule background.
-  - Status color mapping: Blue for listening, cyan for transcribing, orange for extracting, purple for searching, yellow for verifying, green for complete.
-  - Verdict color mapping: Green for true, yellow for substantially true, orange for misleading, red for false, gray for unverifiable.
-- Progress tracking:
-  - Elapsed seconds monospaced digits in compact trailing and expanded trailing.
-  - Confidence percentage displayed alongside verdict in expanded trailing.
-- User interaction:
-  - Dynamic Island expansion reveals additional context; compact forms summarize key information.
+
+### Enhanced Content Formatting Examples
+**Updated** Comprehensive formatting guidelines for widget content:
+
+#### Verdict Badge System
+- **Visual Design**: Capsule-shaped badges with colored dots and confidence percentages
+- **Color Consistency**: Unified color scheme matching verdict categories
+- **Typography Standards**: Bold verdict text with secondary confidence metrics
+
+#### Status Color Mapping
+- **Listening**: Blue for initial audio capture
+- **Transcribing**: Cyan for speech-to-text processing
+- **Extracting**: Orange for claim identification
+- **Searching**: Purple for evidence retrieval
+- **Verifying**: Yellow for cross-checking
+- **Complete**: Green for final results
+
+#### Verdict Color Categories
+- **TRUE**: Green for confirmed facts
+- **SUBSTANTIALLY TRUE**: Yellow for mostly accurate statements
+- **MISLEADING**: Orange for contextually problematic information
+- **FALSE**: Red for demonstrably incorrect claims
+- **UNVERIFIABLE**: Gray for insufficient evidence
+
+### Enhanced Progress Tracking Systems
+**Updated** Comprehensive timing and progress indicators:
+
+#### Elapsed Time Display
+- **Monospaced Digits**: Consistent character width for accurate timing
+- **Real-time Updates**: One-second precision for user feedback
+- **Contextual Fallback**: Status text when no verdict is available
+
+#### Confidence Scoring
+- **Percentage Display**: Clear numerical confidence ratings
+- **Visual Weight**: Emphasized presentation for important decisions
+- **Context Integration**: Combined with verdict presentation
+
+### Advanced User Interaction Patterns
+**Updated** Comprehensive interaction design:
+
+#### Dynamic Island Expansion
+- **Natural Gestures**: Long press for expanded content access
+- **Progressive Disclosure**: Hierarchical information presentation
+- **System Integration**: Native iOS interaction patterns
+
+#### Control Widget Integration
+- **System-Level Access**: Quick access through Control Center
+- **Automation Support**: Siri Shortcuts and system automation compatibility
+- **Visual Feedback**: Clear indication of control availability
 
 **Section sources**
-- [FactShieldWidget.swift:187-218](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L187-L218)
-- [FactShieldWidget.swift:165-184](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L165-L184)
-- [FactShieldWidget.swift:119](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L119)
+- [FactShieldWidget.swift:413-432](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L413-L432)
+- [FactShieldWidget.swift:456-464](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L456-L464)
+- [FactShieldWidget.swift:20-40](file://FactShield/FactShield/Widgets/FactShieldWidget.swift#L20-L40)

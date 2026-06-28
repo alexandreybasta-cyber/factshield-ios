@@ -1,1 +1,0 @@
-Orchestrates the fact-checking workflow by integrating Qwen for claim extraction and verdict synthesis, Tavily for web evidence search, and Google Fact Check Tools for existing fact-check retrieval.

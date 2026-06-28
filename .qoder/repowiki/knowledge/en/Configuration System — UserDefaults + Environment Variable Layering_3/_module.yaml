@@ -1,0 +1,15 @@
+schema_version: 1
+module_path: configuration_system
+title: Configuration System — UserDefaults + Environment Variable Layering
+scope: []
+source_files:
+    - FactShield/FactShield/Core/Network/QwenAPI.swift
+    - FactShield/FactShield/Core/Network/SearchAPI.swift
+    - FactShield/FactShield/Features/Settings/SettingsView.swift
+    - FactShield/FactShield/Utilities/Constants.swift
+    - FactShield/FactShield/Resources/Info.plist
+    - FactShield-ChromeExtension/src/options/options.js
+    - FactShield-ChromeExtension/src/shared/constants.js
+    - FactShield-ChromeExtension/manifest.json
+depends_on: []
+related_to: []

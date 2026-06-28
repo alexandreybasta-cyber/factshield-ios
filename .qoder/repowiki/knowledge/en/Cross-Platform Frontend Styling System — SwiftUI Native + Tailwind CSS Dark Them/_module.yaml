@@ -1,0 +1,16 @@
+schema_version: 1
+module_path: frontend_style
+title: Cross-Platform Frontend Styling System — SwiftUI Native + Tailwind CSS Dark Theme
+scope: []
+source_files:
+    - FactShield-ChromeExtension/src/sidepanel/styles.css
+    - FactShield-ChromeExtension/src/sidepanel/index.html
+    - FactShield-ChromeExtension/src/sidepanel/app.js
+    - FactShield-ChromeExtension/src/options/index.html
+    - Xcode/FactShield/FactShield/Features/Home/HomeView.swift
+    - Xcode/FactShield/FactShield/Features/FactCheck/FactCheckSessionView.swift
+    - Xcode/FactShield/FactShield/Features/Settings/SettingsView.swift
+    - Xcode/FactShield/FactShield/Assets.xcassets/AccentColor.colorset/Contents.json
+    - Xcode/FactShield/FactShieldWidgets/Assets.xcassets/WidgetBackground.colorset/Contents.json
+depends_on: []
+related_to: []

@@ -1,0 +1,14 @@
+schema_version: 1
+module_path: build_system
+title: Xcode-Centric iOS Build with SPM and Manual Deployment
+scope: []
+source_files:
+    - FactShield/Package.swift
+    - Xcode/FactShield/FactShield.xcodeproj/project.pbxproj
+    - FactShield-iOS-BuildInstructions.md
+    - push-via-api.sh
+    - FactShield/.gitignore
+    - .gitignore
+    - FactShield-ChromeExtension/manifest.json
+depends_on: []
+related_to: []

@@ -4,7 +4,11 @@ import AVFAudio
 @main
 struct FactShieldApp: App {
     @State private var appState = AppState.shared
-    @State private var coordinator = FactCheckCoordinator.shared
+    // NOTE: Do NOT observe FactCheckCoordinator here.
+    // Observing it at the App level causes scene re-evaluation when the coordinator
+    // state changes (e.g. isRunning = true from an AppIntent), which forces the
+    // system to activate the window and foreground the app.
+    // Views that need coordinator data should observe it locally.
     
     var body: some Scene {
         WindowGroup {

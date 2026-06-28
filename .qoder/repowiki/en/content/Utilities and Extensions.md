@@ -10,11 +10,17 @@
 - [AudioCaptureService.swift](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift)
 - [AudioBufferProcessor.swift](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift)
 - [QwenAPI.swift](file://FactShield/FactShield/Core/Network/QwenAPI.swift)
-- [ClaimExtractionService.swift](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift)
-- [EvidenceRetrievalService.swift](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift)
-- [VerdictSynthesisService.swift](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift)
 - [SampleHandler.swift](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift)
 </cite>
+
+## Update Summary
+**Changes Made**
+- Added comprehensive documentation for Constants utility with centralized configuration management
+- Documented the complete Logger system with OSLog-based categorization
+- Added detailed coverage of Claim extension for empty claim creation
+- Documented Data extension for hexadecimal string conversion
+- Enhanced integration examples showing utility usage across the fact-checking pipeline
+- Updated architecture diagrams to reflect the new utility infrastructure
 
 ## Table of Contents
 1. [Introduction](#introduction)
@@ -75,11 +81,11 @@ E2 --> SH
 - [Logger.swift:1-18](file://FactShield/FactShield/Utilities/Logger.swift#L1-L18)
 - [Claim.swift:27-36](file://FactShield/FactShield/Core/Claims/Claim.swift#L27-L36)
 - [ActivityManager.swift:82-86](file://FactShield/FactShield/Widgets/ActivityManager.swift#L82-L86)
-- [AudioCaptureService.swift:1-50](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L50)
-- [AudioBufferProcessor.swift:1-41](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L41)
-- [FactCheckCoordinator.swift:1-216](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L216)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
+- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
+- [FactCheckCoordinator.swift:1-200](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L1-L200)
 - [QwenAPI.swift:68-101](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L68-L101)
-- [SampleHandler.swift:1949-2029](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1949-L2029)
+- [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
 
 **Section sources**
 - [Constants.swift:1-37](file://FactShield/FactShield/Utilities/Constants.swift#L1-L37)
@@ -144,8 +150,8 @@ end
 
 **Diagram sources**
 - [FactCheckCoordinator.swift:38-161](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L38-L161)
-- [AudioCaptureService.swift:19-49](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L19-L49)
-- [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
+- [AudioCaptureService.swift:21-77](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L21-L77)
+- [AudioBufferProcessor.swift:16-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L36)
 - [QwenAPI.swift:94-101](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L94-L101)
 
 ## Detailed Component Analysis
@@ -166,7 +172,7 @@ Best practices:
 **Section sources**
 - [Constants.swift:3-36](file://FactShield/FactShield/Utilities/Constants.swift#L3-L36)
 - [QwenAPI.swift:71-72](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L71-L72)
-- [SampleHandler.swift:1952-1962](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1952-L1962)
+- [SampleHandler.swift:14-17](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L14-L17)
 
 ### AppLogger
 Purpose:
@@ -185,10 +191,10 @@ Best practices:
 
 **Section sources**
 - [Logger.swift:4-17](file://FactShield/FactShield/Utilities/Logger.swift#L4-L17)
-- [AudioCaptureService.swift:36-38](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L36-L38)
-- [AudioBufferProcessor.swift:10-10](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L10-L10)
-- [QwenAPI.swift:72-72](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L72-L72)
-- [SampleHandler.swift:1955-1979](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1955-L1979)
+- [AudioCaptureService.swift:31-33](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L31-L33)
+- [AudioBufferProcessor.swift:10](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L10)
+- [QwenAPI.swift:131-132](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L131-L132)
+- [SampleHandler.swift:10-11](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L10-L11)
 
 ### Extensions
 
@@ -213,7 +219,7 @@ Usage examples:
 
 **Section sources**
 - [ActivityManager.swift:82-86](file://FactShield/FactShield/Widgets/ActivityManager.swift#L82-L86)
-- [SampleHandler.swift:2011-2027](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L2011-L2027)
+- [SampleHandler.swift:72-73](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L72-L73)
 
 ### Utility Functions in Services
 
@@ -248,8 +254,8 @@ Thread safety and performance:
 - Rolling buffer trimming caps growth and reduces memory pressure
 
 **Section sources**
-- [AudioCaptureService.swift](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L17-L29)
-- [AudioBufferProcessor.swift](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L12-L36)
+- [AudioCaptureService.swift:17-18](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L17-L18)
+- [AudioBufferProcessor.swift:12-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L12-L36)
 
 ### Network Request Builders
 Purpose:
@@ -261,7 +267,7 @@ Key behaviors:
 - Logs lifecycle events and errors via AppLogger
 
 **Section sources**
-- [QwenAPI.swift](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L68-L101)
+- [QwenAPI.swift:68-101](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L68-L101)
 
 ### Data Transformation Utilities
 Purpose:
@@ -272,7 +278,7 @@ Examples:
 - Formatting helpers for UI rendering (time, icons, colors) are used in views
 
 **Section sources**
-- [FactCheckCoordinator.swift](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L205-L215)
+- [FactCheckCoordinator.swift:164-200](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L164-L200)
 
 ## Dependency Analysis
 Utilities are consumed across modules with loose coupling and clear boundaries:
@@ -298,10 +304,10 @@ DataExt["Data (extension)"] --> SH
 - [Constants.swift:12-17](file://FactShield/FactShield/Utilities/Constants.swift#L12-L17)
 - [Logger.swift:4-17](file://FactShield/FactShield/Utilities/Logger.swift#L4-L17)
 - [QwenAPI.swift:71-72](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L71-L72)
-- [AudioCaptureService.swift:9-9](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L9-L9)
-- [AudioBufferProcessor.swift:10-10](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L10-L10)
-- [FactCheckCoordinator.swift:9-9](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L9-L9)
-- [SampleHandler.swift:1950-1950](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1950-L1950)
+- [AudioCaptureService.swift:9](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L9)
+- [AudioBufferProcessor.swift:10](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L10)
+- [FactCheckCoordinator.swift:9](file://FactShield/FactShield/Features/FactCheck/FactCheckCoordinator.swift#L9)
+- [SampleHandler.swift:5](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L5)
 - [Claim.swift:27-36](file://FactShield/FactShield/Core/Claims/Claim.swift#L27-L36)
 - [ActivityManager.swift:82-86](file://FactShield/FactShield/Widgets/ActivityManager.swift#L82-L86)
 
@@ -310,10 +316,10 @@ DataExt["Data (extension)"] --> SH
 - [Logger.swift:1-18](file://FactShield/FactShield/Utilities/Logger.swift#L1-L18)
 - [Claim.swift:27-36](file://FactShield/FactShield/Core/Claims/Claim.swift#L27-L36)
 - [ActivityManager.swift:82-86](file://FactShield/FactShield/Widgets/ActivityManager.swift#L82-L86)
-- [AudioCaptureService.swift:1-50](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L50)
-- [AudioBufferProcessor.swift:1-41](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L41)
+- [AudioCaptureService.swift:1-93](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L1-L93)
+- [AudioBufferProcessor.swift:1-42](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L1-L42)
 - [QwenAPI.swift:68-101](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L68-L101)
-- [SampleHandler.swift:1949-2029](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1949-L2029)
+- [SampleHandler.swift:1-85](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1-L85)
 
 ## Performance Considerations
 - Memory management
@@ -329,11 +335,8 @@ DataExt["Data (extension)"] --> SH
 
 **Section sources**
 - [AudioBufferProcessor.swift:24-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L24-L36)
-- [AudioCaptureService.swift:17-17](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L17-L17)
-- [SampleHandler.swift:2011-2027](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L2011-L2027)
-- [ClaimExtractionService.swift:134-150](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L134-L150)
-- [EvidenceRetrievalService.swift:216-231](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L216-L231)
-- [VerdictSynthesisService.swift:167-182](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L167-L182)
+- [AudioCaptureService.swift:17](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L17)
+- [SampleHandler.swift:72-73](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L72-L73)
 
 ## Troubleshooting Guide
 Common areas to inspect:
@@ -349,11 +352,10 @@ Diagnostic tips:
 - Validate UserDefaults keys for broadcast state synchronization
 
 **Section sources**
-- [AudioCaptureService.swift:33-39](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L33-L39)
+- [AudioCaptureService.swift:31-33](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L31-L33)
 - [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
-- [QwenAPI.swift:76-82](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L76-L82)
-- [SampleHandler.swift:1955-1979](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L1955-L1979)
-- [ClaimExtractionService.swift:129-131](file://FactShield/FactShield/Core/Claims/ClaimExtractionService.swift#L129-L131)
+- [QwenAPI.swift:101-103](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L101-L103)
+- [SampleHandler.swift:10-11](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L10-L11)
 
 ## Conclusion
 The utilities in FactChecking Live provide a consistent foundation for configuration, logging, and common transformations. By centralizing constants, standardizing logs, and offering small, focused extensions, the system remains maintainable and testable. Following the outlined best practices ensures performance, thread safety, and clarity as new features are added.
@@ -380,8 +382,8 @@ The utilities in FactChecking Live provide a consistent foundation for configura
 - Hex encoding for logging or display
   - [ActivityManager.swift:82-86](file://FactShield/FactShield/Widgets/ActivityManager.swift#L82-L86)
 - Audio buffer processing and logging
-  - [AudioCaptureService.swift:26-29](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L26-L29)
-  - [AudioBufferProcessor.swift:16-22](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L22)
+  - [AudioCaptureService.swift:21-77](file://FactShield/FactShield/Core/Audio/AudioCaptureService.swift#L21-L77)
+  - [AudioBufferProcessor.swift:16-36](file://FactShield/FactShield/Core/Audio/AudioBufferProcessor.swift#L16-L36)
 - Qwen API request construction
   - [QwenAPI.swift:94-101](file://FactShield/FactShield/Core/Network/QwenAPI.swift#L94-L101)
 - JSON normalization before decoding
@@ -389,4 +391,4 @@ The utilities in FactChecking Live provide a consistent foundation for configura
   - [EvidenceRetrievalService.swift:216-231](file://FactShield/FactShield/Core/Verification/EvidenceRetrievalService.swift#L216-L231)
   - [VerdictSynthesisService.swift:167-182](file://FactShield/FactShield/Core/Verification/VerdictSynthesisService.swift#L167-L182)
 - Broadcast audio file writing
-  - [SampleHandler.swift:2011-2027](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L2011-L2027)
+  - [SampleHandler.swift:72-73](file://FactShield/FactShield/BroadcastExtension/SampleHandler.swift#L72-L73)

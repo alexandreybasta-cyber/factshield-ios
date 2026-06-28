@@ -1,6 +1,7 @@
 import Foundation
 import OSLog
 import Combine
+import ActivityKit
 
 @Observable
 final class FactCheckCoordinator {
@@ -35,31 +36,98 @@ final class FactCheckCoordinator {
     // How often to extract claims from the rolling transcript
     private let extractionInterval: TimeInterval = 15.0  // Every 15 seconds
     
-    func startSession() {
+    /// Starts the full fact-checking pipeline in the correct order:
+    /// 1. Wire audio buffer callback (BEFORE audio starts)
+    /// 2. Start speech recognition (creates recognitionRequest)
+    /// 3. Start audio capture (buffers flow through callback → recognizer)
+    /// 4. Start Live Activity
+    /// 5. Start extraction timers
+    @MainActor
+    func startSession() async {
         guard !isRunning else { return }
         isRunning = true
         elapsedSeconds = 0
         
-        // Wire up audio buffer callback
-        audioCapture.onAudioBuffer = { [weak self] buffer in
+        logger.info("Starting fact-check pipeline...")
+        
+        // Step 1: Wire the audio buffer callback FIRST — before any audio flows
+        audioCapture.onAudioBuffer = { buffer in
             AudioBufferProcessor.shared.processBuffer(buffer)
         }
+        logger.info("✓ Audio buffer callback wired")
         
-        // Start periodic claim extraction
+        // Step 2: Configure audio session
+        do {
+            try await AudioSessionManager.shared.configureForCapture()
+            logger.info("✓ Audio session configured")
+        } catch {
+            logger.error("✗ Audio session configuration failed: \(error)")
+        }
+        
+        // Step 3: Start speech recognition (creates recognitionRequest synchronously on its queue)
+        speechRecognizer.startRecognition()
+        // Give the recognition queue a moment to create the request
+        try? await Task.sleep(nanoseconds: 50_000_000) // 50ms
+        logger.info("✓ Speech recognition started")
+        
+        // Step 4: NOW start audio capture — buffers will flow through the wired callback
+        audioCapture.startListening()
+        logger.info("✓ Audio capture started — buffers now flowing to speech recognizer")
+        
+        // Step 5: Start Live Activity (non-critical — log errors but don't fail)
+        do {
+            let activitiesEnabled = ActivityAuthorizationInfo().areActivitiesEnabled
+            logger.info("Live Activities enabled: \(activitiesEnabled)")
+            if activitiesEnabled {
+                try await activityManager.startLiveActivity()
+                logger.info("✓ Live Activity started")
+            } else {
+                logger.warning("✗ Live Activities not enabled — check Settings > FactShield > Live Activities")
+            }
+        } catch {
+            logger.error("✗ Live Activity failed to start: \(error)")
+        }
+        
+        // Step 6: Start periodic claim extraction
         startExtractionTimer()
         
-        // Start elapsed time counter
+        // Step 7: Start elapsed time counter
         startElapsedTimer()
         
-        logger.info("Fact-check session started")
+        logger.info("Fact-check session fully started ✓")
     }
     
+    @MainActor
     func stopSession() async {
         isRunning = false
         extractionTimer?.invalidate()
         extractionTimer = nil
         elapsedTimer?.invalidate()
         elapsedTimer = nil
+        
+        // Stop audio capture
+        audioCapture.stopListening()
+        audioCapture.onAudioBuffer = nil
+        
+        // Stop speech recognition
+        speechRecognizer.stopRecognition()
+        
+        // Deactivate audio session
+        try? await AudioSessionManager.shared.deactivate()
+        
+        // End Live Activity
+        let finalState = FactCheckAttributes.ContentState(
+            status: .complete,
+            verdict: currentVerdict?.verdictType.toActivityType(),
+            confidenceScore: currentVerdict?.confidenceScore ?? 0,
+            sourceCount: currentVerdict?.sources.count ?? 0,
+            topSources: currentVerdict?.sources.map { $0.name } ?? [],
+            reasoningSummary: currentVerdict?.reasoning,
+            claimText: currentClaim?.text,
+            elapsedSeconds: elapsedSeconds,
+            updatedAt: Date()
+        )
+        await activityManager.endActivity(finalState: finalState)
         
         logger.info("Fact-check session stopped")
     }

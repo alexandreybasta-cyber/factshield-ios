@@ -1,3 +1,0 @@
-- **Qwen LLM (DashScope)**: Uses `qwen-plus` for claim extraction and `qwen-max` for verdict synthesis via the DashScope compatible mode API.
-- **Tavily Search API**: Utilizes Tavily's advanced search depth for retrieving web-based evidence.
-- **Google Fact Check Tools API**: Integrates with Google's v1alpha1 claims search endpoint to find existing professional fact-checks.

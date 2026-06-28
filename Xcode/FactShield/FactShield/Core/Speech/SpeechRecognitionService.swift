@@ -20,6 +20,13 @@ final class SpeechRecognitionService {
     private var transcriptBuffer: [String] = []
     private let maxTranscriptWords = 2000
     
+    // Buffer audio during recognition restarts so no frames are lost
+    private var pendingBuffers: [AVAudioPCMBuffer] = []
+    private var isRestarting: Bool = false
+    
+    // Serialization queue for thread-safe access to request/buffers
+    private let recognitionQueue = DispatchQueue(label: "com.factshield.speech.recognition", qos: .userInteractive)
+    
     init() {
         speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
         requestAuthorization()
@@ -44,21 +51,38 @@ final class SpeechRecognitionService {
             return
         }
         
-        // Cancel any ongoing task
+        recognitionQueue.async { [weak self] in
+            self?._startRecognitionOnQueue(speechRecognizer: speechRecognizer)
+        }
+    }
+    
+    private func _startRecognitionOnQueue(speechRecognizer: SFSpeechRecognizer) {
+        // Cancel any ongoing task without calling endAudio (avoid premature finalization)
         recognitionTask?.cancel()
         recognitionTask = nil
         
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
         request.addsPunctuation = true
+        request.taskHint = .dictation  // Continuous audio — more tolerant of silence
         
-        // Prefer on-device recognition when available
+        // Prefer on-device but don't require it (requirement causes faster timeouts)
         if speechRecognizer.supportsOnDeviceRecognition {
-            request.requiresOnDeviceRecognition = true
-            logger.info("Using on-device speech recognition")
+            request.requiresOnDeviceRecognition = false
+            logger.info("On-device speech recognition available (preferred, not required)")
         }
         
         recognitionRequest = request
+        
+        // Flush any buffered audio that arrived during restart
+        for buffer in pendingBuffers {
+            request.append(buffer)
+        }
+        if !pendingBuffers.isEmpty {
+            logger.info("Flushed \(self.pendingBuffers.count) pending buffers into new recognition request")
+        }
+        pendingBuffers.removeAll()
+        isRestarting = false
         
         recognitionTask = speechRecognizer.recognitionTask(with: request) { [weak self] result, error in
             guard let self else { return }
@@ -69,12 +93,18 @@ final class SpeechRecognitionService {
                 self.updateTranscriptBuffer(transcript)
                 
                 if result.isFinal {
-                    self.logger.info("Final transcript: \(transcript)")
+                    self.logger.info("Final transcript received, restarting recognition")
+                    self.restartRecognition()
                 }
             }
             
-            if let error {
-                self.logger.error("Recognition error: \(error)")
+            if let error = error as NSError? {
+                // Error 1110 = "No speech detected" — normal during silence, just restart
+                if error.domain == "kAFAssistantErrorDomain" && error.code == 1110 {
+                    self.logger.info("No speech detected (1110), restarting recognition seamlessly")
+                } else {
+                    self.logger.error("Recognition error: \(error)")
+                }
                 self.restartRecognition()
             }
         }
@@ -83,33 +113,67 @@ final class SpeechRecognitionService {
         logger.info("Speech recognition started")
     }
     
+    private var appendedBufferCount: Int = 0
+    
     func processAudioBuffer(_ buffer: AVAudioPCMBuffer) {
-        recognitionRequest?.append(buffer)
+        recognitionQueue.async { [weak self] in
+            guard let self else { return }
+            if self.isRestarting {
+                // Buffer audio during restart so nothing is lost
+                self.pendingBuffers.append(buffer)
+            } else if let request = self.recognitionRequest {
+                request.append(buffer)
+                self.appendedBufferCount += 1
+                if self.appendedBufferCount == 1 {
+                    self.logger.info("\u{2705} First buffer appended to recognitionRequest — speech pipeline active")
+                } else if self.appendedBufferCount % 50 == 0 {
+                    self.logger.info("Speech recognizer: \(self.appendedBufferCount) buffers appended")
+                }
+            } else {
+                // This is the BUG case — recognitionRequest is nil, buffer is LOST
+                self.logger.warning("\u{26A0}\u{FE0F} processAudioBuffer called but recognitionRequest is nil — buffer DROPPED")
+            }
+        }
     }
     
     @discardableResult
     func stopRecognition() -> String {
-        recognitionRequest?.endAudio()
-        recognitionTask?.cancel()
-        recognitionRequest = nil
-        recognitionTask = nil
-        isRecognizing = false
-        
-        let finalTranscript = getFullTranscript()
-        currentTranscript = ""
-        return finalTranscript
+        recognitionQueue.sync { [weak self] in
+            guard let self else { return "" }
+            self.isRecognizing = false
+            self.isRestarting = false
+            self.pendingBuffers.removeAll()
+            self.recognitionRequest?.endAudio()
+            self.recognitionTask?.cancel()
+            self.recognitionRequest = nil
+            self.recognitionTask = nil
+            
+            let finalTranscript = self.getFullTranscript()
+            self.currentTranscript = ""
+            return finalTranscript
+        }
     }
     
     private func restartRecognition() {
-        guard isRecognizing else { return }
-        
-        recognitionRequest?.endAudio()
-        recognitionTask = nil
-        recognitionRequest = nil
-        
-        // Brief delay before restart
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
-            self?.startRecognition()
+        recognitionQueue.async { [weak self] in
+            guard let self, self.isRecognizing else { return }
+            
+            // Mark as restarting so processAudioBuffer buffers incoming audio
+            self.isRestarting = true
+            
+            // Don't call endAudio() — it causes the 1110 error in the first place
+            // Just nil out and create a fresh request
+            self.recognitionTask?.cancel()
+            self.recognitionTask = nil
+            self.recognitionRequest = nil
+            
+            guard let speechRecognizer = self.speechRecognizer, speechRecognizer.isAvailable else {
+                self.logger.error("Speech recognizer not available for restart")
+                return
+            }
+            
+            // Restart immediately — no delay (the 0.5s gap was causing lost audio)
+            self._startRecognitionOnQueue(speechRecognizer: speechRecognizer)
         }
     }
     
